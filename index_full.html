@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>[Full backup] Catching Fraud — One AI Project, from Problem to Next Steps | RSU AI Project Management</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <style>
+    /* ── Light academic palette ────────────────────────────────────────── */
+    :root {
+      --page:        #e9e2d6;
+      --paper:       #faf6f0;
+      --card:        #fffdf9;
+      --card-tint:   #f3ece2;
+      --line:        #e2d8ca;
+      --line-strong: #cdbfae;
+      --ink:         #2a2024;
+      --ink-soft:    #4a3f43;
+      --muted:       #75696d;
+      --burgundy:    #8a1538;
+      --burgundy-dk: #5e002d;
+      --burgundy-bg: #f4e6ea;
+      --fraud:       #c8323a;
+      --fraud-bg:    #fbeaea;
+      --good:        #2f7d52;
+      --good-bg:     #e8f3ec;
+      --amber:       #a86a12;
+      --amber-bg:    #f8efdf;
+      --serif: Georgia, 'Times New Roman', serif;
+      --sans:  'Segoe UI', system-ui, -apple-system, sans-serif;
+      --mono:  Consolas, 'Cascadia Mono', 'Courier New', monospace;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      background: var(--page);
+      color: var(--ink);
+      font-family: var(--sans);
+      line-height: 1.5;
+      overflow: hidden;
+    }
+
+    /* ── Deck & slide frame (fixed 1280×720, scaled to fit) ────────────── */
+    .deck { position: fixed; inset: 0; }
+    .slide {
+      position: absolute; left: 50%; top: 50%;
+      width: 1280px; height: 720px;
+      transform: translate(-50%, -50%) scale(var(--scale, 1));
+      background: var(--paper);
+      box-shadow: 0 10px 40px rgba(60, 40, 30, 0.18);
+      border-radius: 6px;
+      padding: 84px 72px 56px;
+      display: flex; flex-direction: column;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.35s ease;
+      overflow: hidden;
+    }
+    .slide.active { opacity: 1; pointer-events: auto; }
+    .slide .notes { display: none; }
+
+    /* Slide chrome: lifecycle tracker + footer */
+    .tracker {
+      position: absolute; top: 28px; left: 72px; right: 72px;
+      display: flex; align-items: center; gap: 10px;
+      font-family: var(--mono); font-size: 10.5px; color: var(--muted);
+      letter-spacing: 0.2px;
+    }
+    .tracker .step { display: flex; align-items: center; gap: 7px; white-space: nowrap; }
+    .tracker .dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      border: 1.5px solid var(--line-strong); background: transparent;
+    }
+    .tracker .bar { flex: 1; height: 1px; background: var(--line); }
+    .tracker .step.done { color: var(--ink-soft); }
+    .tracker .step.done .dot { background: var(--line-strong); border-color: var(--line-strong); }
+    .tracker .step.current { color: var(--burgundy); font-weight: 700; }
+    .tracker .step.current .dot {
+      background: var(--burgundy); border-color: var(--burgundy);
+      box-shadow: 0 0 0 4px var(--burgundy-bg);
+    }
+    .tracker.all .step { color: var(--burgundy); }
+    .tracker.all .dot { background: var(--burgundy); border-color: var(--burgundy); }
+
+    .slide-footer {
+      position: absolute; bottom: 20px; left: 72px; right: 72px;
+      display: flex; justify-content: space-between;
+      font-family: var(--mono); font-size: 11px; color: var(--muted);
+    }
+
+    /* ── Typography ────────────────────────────────────────────────────── */
+    .kicker {
+      font-family: var(--mono); font-size: 12px; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--burgundy); margin-bottom: 10px;
+    }
+    h1 {
+      font-family: var(--serif); font-weight: 400;
+      font-size: 76px; line-height: 1.05; color: var(--ink);
+    }
+    h2 {
+      font-family: var(--serif); font-weight: 400;
+      font-size: 40px; line-height: 1.15; color: var(--ink);
+      margin-bottom: 10px;
+    }
+    h3 {
+      font-family: var(--serif); font-weight: 400;
+      font-size: 21px; line-height: 1.25; color: var(--ink);
+      margin-bottom: 6px;
+    }
+    .lead { font-size: 18px; color: var(--ink-soft); max-width: 900px; }
+    .small { font-size: 13px; color: var(--muted); }
+    .tiny  { font-size: 11.5px; color: var(--muted); }
+    .mono  { font-family: var(--mono); }
+    .num   { font-family: var(--serif); line-height: 1; }
+    .t-fraud { color: var(--fraud); }
+    .t-good  { color: var(--good); }
+    .t-amber { color: var(--amber); }
+    .t-burg  { color: var(--burgundy); }
+    strong { font-weight: 600; color: var(--ink); }
+
+    /* ── Layout helpers ────────────────────────────────────────────────── */
+    .body { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 22px; min-height: 0; }
+    .row  { display: flex; gap: 20px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
+    .split  { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 28px; align-items: stretch; }
+    /* Let grid columns shrink below their content (charts otherwise push cards off the slide) */
+    .grid-2 > *, .grid-3 > *, .grid-5 > *, .split > * { min-width: 0; }
+
+    .card {
+      background: var(--card); border: 1px solid var(--line);
+      border-radius: 10px; padding: 20px 22px;
+    }
+    .card.tint  { background: var(--card-tint); }
+    .card.burg  { border-color: var(--burgundy); box-shadow: inset 4px 0 0 var(--burgundy); }
+    .card.fraud { background: var(--fraud-bg); border-color: #efc7c7; }
+    .card.good  { background: var(--good-bg);  border-color: #c5e0cf; }
+    .card.amber { background: var(--amber-bg); border-color: #ead6b3; }
+
+    .tag {
+      display: inline-block; font-family: var(--mono); font-size: 10.5px;
+      letter-spacing: 1px; text-transform: uppercase;
+      padding: 3px 8px; border-radius: 4px; margin-bottom: 10px;
+      border: 1px solid currentColor;
+    }
+
+    .callout {
+      border-left: 3px solid var(--burgundy);
+      padding: 10px 0 10px 20px;
+      font-family: var(--serif); font-size: 21px; line-height: 1.35; color: var(--ink);
+    }
+    .callout .small { font-family: var(--sans); display: block; margin-top: 4px; }
+
+    ul.points { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    ul.points li { position: relative; padding-left: 20px; font-size: 16px; color: var(--ink-soft); }
+    ul.points li::before {
+      content: ''; position: absolute; left: 2px; top: 9px;
+      width: 7px; height: 7px; border-radius: 50%; background: var(--burgundy);
+    }
+
+    .stat .num { font-size: 40px; }
+    .stat .lbl { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+
+    .chart-box { position: relative; flex: 1; min-height: 0; }
+
+    table.data { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    table.data th {
+      text-align: left; font-family: var(--mono); font-size: 11px; font-weight: 400;
+      letter-spacing: 0.8px; text-transform: uppercase; color: var(--muted);
+      padding: 6px 10px; border-bottom: 1px solid var(--line-strong);
+    }
+    table.data td { padding: 7px 10px; border-bottom: 1px solid var(--line); }
+    table.data td.r, table.data th.r { text-align: right; }
+    table.data tr.hl td { background: var(--burgundy-bg); font-weight: 600; }
+
+    .placeholder {
+      flex: 1; border: 2px dashed var(--line-strong); border-radius: 12px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 10px; text-align: center; color: var(--muted); background: var(--card-tint);
+    }
+
+    /* ── Controls & speaker notes ──────────────────────────────────────── */
+    .controls {
+      position: fixed; right: 12px; top: 10px; z-index: 10;
+      display: flex; gap: 6px; align-items: center;
+      font-family: var(--mono); font-size: 11px; color: var(--muted);
+      opacity: 0.2; transition: opacity 0.2s;
+    }
+    .controls:hover { opacity: 1; }
+    .controls button {
+      font: inherit; color: var(--ink-soft); background: var(--paper);
+      border: 1px solid var(--line-strong); border-radius: 5px;
+      padding: 4px 9px; cursor: pointer;
+    }
+    .controls button:hover { border-color: var(--burgundy); color: var(--burgundy); }
+    .notes-panel {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 9;
+      max-height: 34vh; overflow-y: auto;
+      background: #2a2024; color: #f1e9e3;
+      padding: 16px 28px 44px; font-size: 15px; line-height: 1.55;
+      transform: translateY(100%); transition: transform 0.25s ease;
+    }
+    .notes-panel.open { transform: translateY(0); }
+    .notes-panel .np-title { font-family: var(--mono); font-size: 11px; letter-spacing: 1px; color: #c9b8ad; margin-bottom: 6px; }
+    .notes-panel ul { padding-left: 18px; }
+
+    /* ── Print / PDF: one slide per page ───────────────────────────────── */
+    @media print {
+      @page { size: 1280px 720px; margin: 0; }
+      *, *::before, *::after { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      html, body { height: auto; overflow: visible; background: var(--paper); }
+      .deck { position: static; }
+      .slide {
+        position: relative; left: auto; top: auto; transform: none !important;
+        opacity: 1 !important; box-shadow: none; border-radius: 0;
+        break-after: page; page-break-after: always;
+      }
+      .controls, .notes-panel { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!--  1 · TITLE                                                             -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<section class="slide" data-title="Title">
+  <div class="body" style="gap: 28px;">
+    <div class="kicker">RSU · AI Project Management · Group Project</div>
+    <h1>Catching Fraud</h1>
+    <p class="lead" style="font-family: var(--serif); font-size: 28px; color: var(--ink-soft); margin-top: -12px;">
+      One AI project, from problem to next steps
+    </p>
+    <div class="callout" style="max-width: 760px;">
+      A model can be 99.5% accurate and catch zero fraud.
+      <span class="small">This is how we planned, built, launched and would measure one that doesn't.</span>
+    </div>
+    <div style="margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line);">
+      <div class="tiny mono" style="letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;">Team</div>
+      <div style="font-size: 15px; color: var(--ink-soft); display: flex; flex-wrap: wrap; gap: 6px 26px;">
+        <span>Girts Ziemanis</span><span>Ugis Rutins</span><span>Maris Zelcs</span>
+        <span>Ruslans Muhitovs</span><span>Evija Sturmane</span><span>Jolanta Stutane</span>
+      </div>
+    </div>
+  </div>
+  <aside class="notes">
+    <ul>
+      <li>Hook: 99.5% accuracy sounds great, but here it means nothing, because only 0.52% of transactions are fraud.</li>
+      <li>We walk through the nine parts of the project brief, from problem and users to next steps. The tracker at the top shows where we are.</li>
+    </ul>
+  </aside>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!--  2 · PROBLEM AND USERS                                                 -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<section class="slide" data-phase="1" data-title="Problem and users">
+  <div class="kicker">Part 1 · Problem and users</div>
+  <h2>Stop fraud before the customer loses money</h2>
+  <p class="lead">A card issuer in the western US wants to block fraudulent payments automatically.</p>
+
+  <div class="body">
+    <div class="grid-3">
+      <div class="card">
+        <span class="tag t-burg">Cardholder</span>
+        <h3>Wants to pay without friction</h3>
+        <p class="small">and never to lose money to a stolen card.</p>
+      </div>
+      <div class="card">
+        <span class="tag t-burg">Fraud analyst</span>
+        <h3>Reviews suspicious payments</h3>
+        <p class="small">Needs few, well-chosen cases, not thousands of alerts.</p>
+      </div>
+      <div class="card">
+        <span class="tag t-burg">The bank</span>
+        <h3>Pays for every missed fraud</h3>
+        <p class="small">Chargebacks, lost trust, and regulators watching.</p>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card fraud">
+        <span class="tag t-fraud">Missed fraud</span>
+        <h3>Fraud &rarr; approved: <strong class="t-fraud">expensive</strong></h3>
+        <p class="small">The money is gone. Average fraud payment in our data: $518.</p>
+      </div>
+      <div class="card amber">
+        <span class="tag t-amber">False alarm</span>
+        <h3>Legit &rarr; blocked: <strong class="t-amber">recoverable</strong></h3>
+        <p class="small">The customer calls, the card is unblocked in minutes.</p>
+      </div>
+    </div>
+    <div class="callout" style="font-size: 19px;">
+      Why AI and not fixed rules? Fraud is a <em>combination</em>: late hour + large amount + online purchase + customer profile.
+      <span class="small">Rules miss combinations and fraudsters learn them. A model learns from history and can be retrained.</span>
+    </div>
+  </div>
+  <aside class="notes">
+    <ul>
+      <li>Three users with different needs: the cardholder (no friction, no loss), the fraud analyst (manageable workload), the bank (losses and trust).</li>
+      <li>The two mistakes have very different prices. Lecture 6: "a wrong blur is cheap; a missed face is not." Ours: a false alarm is cheap, a missed fraud is not.</li>
+      <li>Build or buy: no ready-made public model fits one bank's fraud patterns, so we train our own, with free tools.</li>
+    </ul>
+  </aside>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!--  3 · FIRST-VERSION SCOPE                                               -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<section class="slide" data-phase="2" data-title="First-version scope">
+  <div class="kicker">Part 2 · First-version scope</div>
+  <h2>Decide what “good” means before building</h2>
+
+  <div class="body">
+    <div class="grid-3">
+      <div class="card burg">
+        <div class="tiny mono t-burg">Primary metric</div>
+        <h3 style="margin-top: 6px;">Recall: share of fraud caught</h3>
+        <p class="small">What the business asked for. Accuracy is useless here: “never fraud” scores 99.5%.</p>
+      </div>
+      <div class="card">
+        <div class="tiny mono">Guardrail</div>
+        <h3 style="margin-top: 6px;">False alarms stay low</h3>
+        <p class="small">Precision and F1 keep us from blocking every customer.</p>
+      </div>
+      <div class="card">
+        <div class="tiny mono">Business measure</div>
+        <h3 style="margin-top: 6px;">Dollars of fraud prevented</h3>
+        <p class="small">Every result is also expressed in money, so stakeholders can compare.</p>
+      </div>
+    </div>
+
+    <div class="card tint" style="padding: 18px 22px;">
+      <div class="row" style="justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
+        <div class="tiny mono" style="letter-spacing: 1px; text-transform: uppercase;">v1 decision rule: three score bands</div>
+        <span class="tiny">when unsure, a person decides</span>
+      </div>
+      <div class="row" style="gap: 6px; height: 56px;">
+        <div style="flex: 10; background: var(--good-bg); border: 1px solid #c5e0cf; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px;"><strong class="t-good">Approve</strong>&nbsp; score &lt; 0.1</div>
+        <div style="flex: 3; background: var(--amber-bg); border: 1px solid #ead6b3; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px;"><strong class="t-amber">Analyst review</strong>&nbsp; 0.1–0.4</div>
+        <div style="flex: 6; background: var(--fraud-bg); border: 1px solid #efc7c7; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px;"><strong class="t-fraud">Block</strong>&nbsp; score &ge; 0.4</div>
+      </div>
+      <p class="tiny" style="margin-top: 8px;">On our test set: the review band holds only ~23 of 67,922 payments, and 6 of them are fraud the block rule alone would miss.</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="card good" style="padding: 14px 20px;">
+        <span class="tag t-good">In v1</span>
+        <p class="small">Trained model · score bands · API that scores one payment · demo dashboard</p>
+      </div>
+      <div class="card" style="padding: 14px 20px;">
+        <span class="tag" style="color: var(--muted);">Not in v1, on purpose</span>
+        <p class="small">Real bank systems · live monitoring · automatic retraining · full-volume traffic</p>
+      </div>
+    </div>
+  </div>
+  <aside class="notes">
+    <ul>
+      <li>Success criteria were fixed before experimenting: Recall first, false alarms as a guardrail, dollars for stakeholders.</li>
+      <li>Lecture 5 "a rule for not sure" and Lecture 6 "when unsure, a person decides": instead of one cutoff we propose three bands.</li>
+      <li>Numbers from our threshold analysis: between scores 0.1 and 0.4 there are 6 frauds and 17 legitimate payments in the test set. That is a tiny, high-value workload for analysts. "The AI decides how much work a person gets."</li>
+      <li>Scope discipline: the "not in v1" list becomes the roadmap later.</li>
+    </ul>
+  </aside>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!--  4 · DATA: SOURCE                                                      -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<section class="slide" data-phase="3" data-title="Data: where it came from">
+  <div class="kicker">Part 3 · Data</div>
+  <h2>Where our data came from, and how we balanced it</h2>
+  <p class="lead">A public Kaggle dataset of card payments: fast and free to start, but not a bank's own data.</p>
+
+  <div class="row" style="margin: 10px 0 0; gap: 40px;">
+    <div class="stat"><div class="num">339,607</div><div class="lbl">card payments</div></div>
+    <div class="stat"><div class="num">2019–20</div><div class="lbl">two years of history</div></div>
+    <div class="stat"><div class="num">13</div><div class="lbl">western US states</div></div>
+    <div class="stat"><div class="num">14</div><div class="lbl">merchant categories</div></div>
+    <div class="stat"><div class="num">15</div><div class="lbl">columns per payment</div></div>
+  </div>
+
+  <div class="body" style="gap: 14px;">
+    <div class="card" style="padding: 14px 22px;">
+      <div class="row" style="justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+        <h3>The problem: only 1,782 are fraud (0.52%, 1 in 191)</h3>
+        <span class="tiny">bar = share of payments</span>
+      </div>
+      <div class="row" style="gap: 0; height: 28px; border-radius: 6px; overflow: hidden;">
+        <div style="flex: 99.48; background: var(--line); display: flex; align-items: center; padding-left: 14px; font-size: 13px; color: var(--ink-soft);">337,825 legitimate</div>
+        <div style="flex: 0.52; min-width: 8px; background: var(--fraud);"></div>
+      </div>
+
+      <div class="row" style="justify-content: space-between; align-items: baseline; margin: 14px 0 8px;">
+        <h3>The fix: we generated synthetic fraud for training (SMOTE)</h3>
+        <span class="tiny">training data only</span>
+      </div>
+      <div class="row" style="gap: 0; height: 28px; border-radius: 6px; overflow: hidden;">
+        <div style="flex: 50; background: var(--line); display: flex; align-items: center; padding-left: 14px; font-size: 13px; color: var(--ink-soft);">270,259 legitimate</div>
+        <div style="flex: 0.53; background: var(--fraud);"></div>
+        <div style="flex: 49.47; background: repeating-linear-gradient(135deg, #f1c9cb 0 6px, #fbeaea 6px 12px); display: flex; align-items: center; padding-left: 14px; font-size: 13px; color: var(--fraud);">+ 268,833 synthetic fraud &nbsp;<span class="tiny">(blended from 1,426 real ones)</span></div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card" style="padding: 14px 20px;">
+        <span class="tag t-burg">Source decision</span>
+        <h3>Existing dataset</h3>
+        <p class="small">Ready today and free, but collected by someone else for someone else. A real bank would retrain on its own payments.</p>
+      </div>
+      <div class="card" style="padding: 14px 20px;">
+        <span class="tag t-burg">Generated data</span>
+        <h3>New fraud, made by blending</h3>
+        <p class="small">Each synthetic case lies between two similar real frauds. Cheap and fast, but it may not look like real fraud.</p>
+      </div>
+      <div class="card" style="padding: 14px 20px;">
+        <span class="tag t-burg">Locked test set</span>
+        <h3>20% set aside first</h3>
+        <p class="small">67,922 real payments, nothing generated, untouched until the final test. Fixed seed, so it can be rebuilt.</p>
+      </div>
+    </div>
+  </div>
+  <aside class="notes">
+    <ul>
+      <li>Lecture 2, four data sources: we chose an existing dataset. Cost low, speed "ready today", but fit is often poor: it is not our bank, our customers or our time period.</li>
+      <li>The challenge is imbalance: 339,607 payments, but only 1,782 frauds. Lecture 2, "plan the variety, not the number": those few cases decide how good the model can get.</li>
+      <li>Fixing the imbalance with generated data (Lecture 2's fourth source: "made by a program; cheap, may not look real"). SMOTE creates a new fraud example on the line between a real fraud and one of its 5 most similar frauds. The training set went from 1,426 frauds among 271,685 payments to a 50/50 balance: 270,259 legitimate and 270,259 fraud, so 268,833 fraud examples are synthetic.</li>
+      <li>Only the training data was balanced. The test set stays 100% real, so the final scores reflect real payments.</li>
+      <li>We tested two approaches to imbalance: SMOTE for Logistic Regression, Decision Tree and Random Forest; class weights (rare fraud counts more, no generated data) for XGBoost and LightGBM. Part 5 shows what that taught us.</li>
+      <li>Labels: here the fraud column is given. In production, the answer comes weeks later through chargebacks (Lecture 8).</li>
+      <li>Before any analysis, 20% (67,922 payments) was locked away as the test set, stratified to keep the 0.52% fraud ratio, with random seed 42 so it is reproducible.</li>
+      <li>Check whether the Kaggle data is simulated, and say so if it is.</li>
+    </ul>
+  </aside>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!--  5 · DATA: WHAT FRAUD LOOKS LIKE                                       -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<section class="slide" data-phase="3" data-title="What fraud looks like">
+  <div class="kicker">Part 3 · Data</div>
+  <h2>What fraud looks like, turned into signals</h2>
+  <p class="lead">We explored the data before modelling. Each pattern became an input the model can use.</p>
+
+  <div class="body">
+    <div class="split" style="grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);">
+      <div class="card" style="display: flex; flex-direction: column; height: 400px;">
+        <div class="row" style="justify-content: space-between; align-items: baseline;">
+          <h3>Fraud rate by hour of day</h3>
+          <span class="tiny">all payments</span>
+        </div>
+        <div class="chart-box"><canvas id="chartHour"></canvas></div>
+        <p class="tiny" style="margin-top: 6px;"><strong class="t-fraud">86% of all fraud</strong> happens 22:00–03:59, a window with only 23% of payments.</p>
+      </div>
+      <div class="card" style="padding: 8px 14px;">
+        <table class="data">
+          <thead><tr><th>Pattern in the data</th><th></th><th>Signal for the model</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Night</strong><br><span class="small">fraud rate 1.92% at night vs 0.10% by day</span></td><td class="t-burg">&rarr;</td><td><span class="mono" style="font-size: 12px;">hour, day of week</span><br><span class="tiny">from the timestamp</span></td></tr>
+            <tr><td><strong>Large amounts</strong><br><span class="small">average $518 vs $68; half of frauds &gt; $500</span></td><td class="t-burg">&rarr;</td><td><span class="mono" style="font-size: 12px;">amount, log amount</span><br><span class="tiny">log tames the $1–$28k range</span></td></tr>
+            <tr><td><strong>Online and grocery</strong><br><span class="small">online shopping 1.44%, grocery 1.32% vs home 0.15%</span></td><td class="t-burg">&rarr;</td><td><span class="mono" style="font-size: 12px;">14 category yes/no columns</span><br><span class="tiny">words become numbers</span></td></tr>
+            <tr><td><strong>Older customers</strong><br><span class="small">60+: 0.72% vs 0.35% for ages 30–45</span></td><td class="t-burg">&rarr;</td><td><span class="mono" style="font-size: 12px;">age</span><br><span class="tiny">from date of birth</span></td></tr>
+            <tr style="background: var(--amber-bg);"><td><strong>Far from home?</strong><br><span class="small">tested: no, both ~76 km on average</span></td><td class="t-amber">&rarr;</td><td><span class="mono" style="font-size: 12px;">distance to merchant</span><br><span class="tiny t-amber">kept, but the assumption failed</span></td></tr>
+          </tbody>
+        </table>
+        <p class="small" style="margin: 10px 0 4px;"><strong>15 raw columns &rarr; 39 model inputs.</strong></p>
+      </div>
+    </div>
+  </div>
+  <aside class="notes">
+    <ul>
+      <li>Exploration before modelling: we looked for what makes fraud different, then turned each finding into a signal (feature). All numbers here are computed from the full dataset.</li>
+      <li>Night: 86% of fraud happens between 22:00 and 03:59, although only 23% of all payments happen then. Fraud rate at night 1.92% vs 0.10% in the daytime, about 19&times; higher.</li>
+      <li>Amount: average fraud $518 vs $68 for legitimate payments (medians $356 vs $46). 47% of frauds are above $500, and about 1 in 5 payments above $500 is fraud. Log amount compresses the huge range.</li>
+      <li>Category: online shopping 1.44%, in-store grocery 1.32%, online misc 1.28%, against 0.15% for home goods. One yes/no column per category (one-hot encoding).</li>
+      <li>Age: customers over 60 have a fraud rate of 0.72%, double the 0.35% of 30–45 year olds.</li>
+      <li>Tested assumption: we expected fraud far from the cardholder's home. The data says no: average distance is 75.6 km for both. We kept the feature, but this is a project lesson: test assumptions with data instead of trusting intuition.</li>
+    </ul>
+  </aside>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!--  6 · THE AI PART                                                       -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<section class="slide" data-phase="4" data-title="The AI part">
+  <div class="kicker">Part 4 · The system and its AI part</div>
+  <h2>The AI part: one model, one job</h2>
+  <p class="lead">Turn one payment into one number: how likely is this to be fraud?</p>
+
+  <div class="body">
+    <div class="row" style="align-items: stretch; gap: 12px;">
+      <div class="card tint" style="flex: 1.1;">
+        <div class="tiny mono">Input</div>
+        <h3 style="margin: 6px 0 8px;">39 signals about the payment</h3>
+        <p class="small">Hour, amount, merchant category, customer age, location: the signals from part 3.</p>
+      </div>
+      <div class="t-burg" style="align-self: center; font-size: 22px;">&rarr;</div>
+      <div class="card burg" style="flex: 1.3; border-style: dashed;">
+        <div class="tiny mono t-burg">Model · to be chosen</div>
+        <h3 style="margin: 6px 0 8px;">Learns fraud patterns from past payments</h3>
+        <p class="small">Which kind of model? We don't guess: we test candidates in part 5.</p>
+      </div>
+      <div class="t-burg" style="align-self: center; font-size: 22px;">&rarr;</div>
+      <div class="card tint" style="flex: 1;">
+        <div class="tiny mono">Output</div>
+        <h3 style="margin: 6px 0 8px;">Fraud score 0 – 1</h3>
+        <p class="small">The score bands then decide: approve, review or block.</p>
+      </div>
+    </div>
+
+    <div class="card" style="padding: 16px 22px;">
+      <div class="row" style="justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
+        <div class="tiny mono" style="letter-spacing: 1px; text-transform: uppercase;">What the model must do: our selection criteria</div>
+        <span class="tiny">every candidate is judged on these</span>
+      </div>
+      <div class="grid-5">
+        <div><div class="num t-burg" style="font-size: 26px;">1</div><strong>Catch rare fraud</strong><p class="small">1 in 191 payments</p></div>
+        <div><div class="num t-burg" style="font-size: 26px;">2</div><strong>Few false alarms</strong><p class="small">customers keep paying</p></div>
+        <div><div class="num t-burg" style="font-size: 26px;">3</div><strong>Answer in milliseconds</strong><p class="small">on ordinary CPU servers</p></div>
+        <div><div class="num t-burg" style="font-size: 26px;">4</div><strong>Show its reasons</strong><p class="small">which signals drove a score</p></div>
+        <div><div class="num t-burg" style="font-size: 26px;">5</div><strong>Ours to own</strong><p class="small">trained on our data, free tools</p></div>
+      </div>
+    </div>
+  </div>
+  <aside class="notes">
+    <ul>
+      <li>The AI part has one job: give each payment a fraud score from 0 to 1. Everything around it (lookups, features, bands, people) is ordinary programs and people (Lecture 6: one product = AI + programs + people).</li>
+      <li>We deliberately don't pick a model here. First we write down what the model must do; then we test candidates against it in part 5.</li>
+      <li>Criteria 1 and 2 come from the success criteria in part 2 (Recall, false alarms). Criterion 3 comes from the system: a payment is waiting (Lecture 7). Criterion 4: analysts and customers need reasons. Criterion 5: build or buy (Lecture 6) — no ready-made public model knows one bank's fraud.</li>
+    </ul>
+  </aside>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!--  6 · AI PIPELINE (PLACEHOLDER)                                         -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<section class="slide" data-phase="4" data-title="AI pipeline">
+  <div class="kicker">Part 4 · The system and its AI part</div>
+  <h2>The AI pipeline</h2>
+
+  <div class="placeholder" style="margin-top: 16px;">
+    <div class="tag t-burg">Placeholder</div>
+    <h3>Pipeline content to be added</h3>
+    <p class="small" style="max-width: 560px;">This slide will be filled with the pipeline supplied by our teammate. Suggested format (Lecture 6): train &rarr; export &rarr; catalogue &rarr; build &rarr; deploy &rarr; serve &rarr; watch, each marked done or planned.</p>
+  </div>
+  <aside class="notes">
+    <p>Placeholder: pipeline content and speaker notes to be provided by teammate.</p>
+  </aside>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!--  6 · ONE PAYMENT                                                       -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<section class="slide" data-phase="4" data-title="One payment, in milliseconds">
+  <div class="kicker">Part 4 · The system and its AI part</div>
+  <h2>One payment, in milliseconds</h2>
+  <p class="lead">The customer is waiting at the till, so the number that matters is speed per payment.</p>
+
+  <div class="body">
+    <div class="row" style="align-items: stretch; gap: 10px;">
+      <div class="card tint" style="flex: 1; padding: 14px 16px;"><div class="tiny mono">01 · program</div><h3 style="font-size: 18px; margin-top: 4px;">Payment arrives</h3><div class="small">amount, merchant, time</div><div class="tiny mono" style="margin-top: 8px;">~1 ms</div></div>
+      <div class="t-burg" style="align-self: center;">&rarr;</div>
+      <div class="card tint" style="flex: 1.2; padding: 14px 16px; border-color: var(--amber);"><div class="tiny mono t-amber">02 · program</div><h3 style="font-size: 18px; margin-top: 4px;">Look up the customer</h3><div class="small">home location, age</div><div class="tiny mono t-amber" style="margin-top: 8px;">~20 ms · likely bottleneck</div></div>
+      <div class="t-burg" style="align-self: center;">&rarr;</div>
+      <div class="card tint" style="flex: 1; padding: 14px 16px;"><div class="tiny mono">03 · program</div><h3 style="font-size: 18px; margin-top: 4px;">Build features</h3><div class="small">hour, distance, log amount</div><div class="tiny mono" style="margin-top: 8px;">~2 ms</div></div>
+      <div class="t-burg" style="align-self: center;">&rarr;</div>
+      <div class="card burg" style="flex: 1; padding: 14px 16px;"><div class="tiny mono t-burg">04 · AI</div><h3 style="font-size: 18px; margin-top: 4px;">Fraud model score</h3><div class="small">fraud probability</div><div class="tiny mono" style="margin-top: 8px;">~2 ms</div></div>
+      <div class="t-burg" style="align-self: center;">&rarr;</div>
+      <div class="card tint" style="flex: 1.1; padding: 14px 16px;"><div class="tiny mono">05 · program / person</div><h3 style="font-size: 18px; margin-top: 4px;">Decide</h3><div class="small">approve · review · block</div><div class="tiny mono" style="margin-top: 8px;">~1 ms</div></div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <span class="tag t-burg">The number &amp; target</span>
+        <h3>p99 latency &lt; 100 ms</h3>
+        <p class="small">The slowest 1 in 100 payments, not the average. Our proposed target.</p>
+      </div>
+      <div class="card">
+        <span class="tag t-burg">Where it runs</span>
+        <h3>Bank's own servers or EU cloud, CPU</h3>
+        <p class="small">Classic models on tables need no GPU. Personal data stays under the bank's control.</p>
+      </div>
+      <div class="card">
+        <span class="tag t-burg">At 10&times; payments</span>
+        <h3>The customer lookup runs out first</h3>
+        <p class="small">Cache profiles, add API copies behind a load balancer. If overloaded: fall back to rules, never a queue.</p>
+      </div>
+    </div>
+  </div>
+  <aside class="notes">
+    <ul>
+      <li>This answers Lecture 7's part-4 questions: draw one request, which number matters with a target, where it runs, what runs out first at 10&times;.</li>
+      <li>Millisecond figures are our planning budget, not measurements. First step in production: measure (Lecture 7: "measure first").</li>
+      <li>Lecture 6: "the AI is the clever part, not the heavy part". The model takes a few ms; looking up data around it is the likely bottleneck.</li>
+      <li>Lecture 6: one product = AI + programs + people. Only step 4 is AI; step 5 can involve a person (the review band).</li>
+      <li>No batching: a payment can't wait for others. Overload plan: "answer smaller" with simple rules.</li>
+    </ul>
+  </aside>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!--  7 · EXPERIMENT LOG                                                    -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<section class="slide" data-phase="5" data-title="Experiment log">
+  <div class="kicker">Part 5 · Building and testing</div>
+  <h2>How we tested and chose the model</h2>
+
+  <div class="body" style="gap: 16px;">
+    <div class="grid-3">
+      <div class="card tint" style="padding: 12px 18px;">
+        <div class="tiny mono">How we test</div>
+        <p class="small" style="margin-top: 4px;">Same data and features for every model. Final score only on the <strong>locked test set</strong>: 356 frauds in 67,922 payments.</p>
+      </div>
+      <div class="card tint" style="padding: 12px 18px;">
+        <div class="tiny mono">How we tune</div>
+        <p class="small" style="margin-top: 4px;">Settings searched automatically, checked with 5-fold cross-validation on training data only.</p>
+      </div>
+      <div class="card tint" style="padding: 12px 18px;">
+        <div class="tiny mono">How we choose</div>
+        <p class="small" style="margin-top: 4px;">Against the part-4 criteria: best balance of fraud caught vs false alarms (F1). Start simple; one new idea per run.</p>
+      </div>
+    </div>
+    <div class="card" style="padding: 8px 14px;">
+      <table class="data">
+        <thead><tr>
+          <th>Run</th><th>Idea tested</th><th class="r">Frauds caught</th><th class="r">False alarms</th><th class="r">Test F1</th><th>Decision</th>
+        </tr></thead>
+        <tbody>
+          <tr><td class="mono">01</td><td>Logistic Regression · one straight-line rule</td><td class="r">237</td><td class="r">641</td><td class="r">0.384</td><td>Keep as baseline</td></tr>
+          <tr><td class="mono">02</td><td>Decision Tree · yes/no rule combinations</td><td class="r">274</td><td class="r">158</td><td class="r">0.695</td><td>Better, unstable</td></tr>
+          <tr><td class="mono">03</td><td>Random Forest · a vote of many trees</td><td class="r">250</td><td class="r">45</td><td class="r">0.768</td><td>Fewer alarms, misses more</td></tr>
+          <tr><td class="mono">04</td><td>XGBoost · each tree fixes the last one's mistakes</td><td class="r"><strong>312</strong></td><td class="r">47</td><td class="r">0.873</td><td>Runner-up</td></tr>
+          <tr class="hl"><td class="mono">05</td><td>LightGBM · same idea, faster</td><td class="r">299</td><td class="r"><strong>24</strong></td><td class="r"><strong>0.881</strong></td><td>Champion ★</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout" style="font-size: 19px;">
+      Champion: LightGBM, not the top catcher.
+      <span class="small">XGBoost caught 13 more frauds but raised twice the false alarms. LightGBM has the best balance (highest F1, ROC-AUC 0.998). Losing runs stay on record.</span>
+    </div>
+  </div>
+  <aside class="notes">
+    <ul>
+      <li>Lecture 3: every run gets a row (idea, change, result, decision), and we change one thing at a time.</li>
+      <li>From baseline to champion: 237 &rarr; 299 frauds caught (Recall 67% &rarr; 84%), false alarms 641 &rarr; 24.</li>
+      <li>Fair experiment: same split, same features, tuned on F1 with 5-fold cross-validation, judged on the untouched test set.</li>
+      <li>The champion choice is a recorded trade-off, not "highest number wins". Lecture 3 champion loop: losers stay on record.</li>
+    </ul>
+  </aside>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!--  INSIDE THE CHAMPION                                                   -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<section class="slide" data-phase="5" data-title="Inside the champion">
+  <div class="kicker">Part 5 · Building and testing</div>
+  <h2>The champion against our criteria</h2>
+  <p class="lead">LightGBM: hundreds of small decision trees, each correcting the mistakes of the ones before it.</p>
+
+  <div class="body">
+    <div class="split" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);">
+      <div class="card" style="display: flex; flex-direction: column; height: 360px;">
+        <div class="row" style="justify-content: space-between; align-items: baseline;">
+          <h3>What the champion relies on most</h3>
+          <span class="tiny">feature importance</span>
+        </div>
+        <div class="chart-box"><canvas id="chartImportance"></canvas></div>
+        <p class="tiny" style="margin-top: 6px;"><span class="t-burg">&#9632;</span> signals we built in part 3 &nbsp; <span style="color: #cdbfae;">&#9632;</span> raw columns</p>
+      </div>
+      <table class="data card" style="padding: 0; align-self: center;">
+        <thead><tr><th>Criterion from part 4</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>1 · Catch rare fraud</td><td><strong class="t-good">84%</strong> caught (299 of 356)</td></tr>
+          <tr><td>2 · Few false alarms</td><td><strong class="t-good">24</strong> in 67,922 payments</td></tr>
+          <tr><td>3 · Milliseconds on CPU</td><td>Runs on CPU, no GPU; <span class="t-amber">speed to be measured</span></td></tr>
+          <tr><td>4 · Show its reasons</td><td>Feature importance, left</td></tr>
+          <tr><td>5 · Ours to own</td><td>Open-source, trained on our split</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <aside class="notes">
+    <ul>
+      <li>Only now we name the model: after testing five candidates, LightGBM won on the balance of fraud caught and false alarms.</li>
+      <li>LightGBM is gradient boosting: many small decision trees built one after another, each fixing the previous ones' mistakes. Trained on the 80% training split (271,685 payments) with class weights for the rare fraud class.</li>
+      <li>Feature importance: amount is #1, then age, distance and hour. Three of the top four are signals we built in part 3. Distance ranks high even though fraud and legitimate payments have the same average distance: this importance counts how often a feature is used, not how much it helps, so read it with care.</li>
+      <li>Criterion 3 is honest: the model type runs on CPU, but we have not yet measured its speed under load. That's the first step in production (Lecture 7: measure first).</li>
+    </ul>
+  </aside>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!--  8 · TUNING AND TRUSTING THE NUMBERS                                   -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<section class="slide" data-phase="5" data-title="Tuning and trusting the numbers">
+  <div class="kicker">Part 5 · Building and testing</div>
+  <h2>Tune the alarm, then question the result</h2>
+
+  <div class="body">
+    <div class="split" style="grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);">
+      <div class="card" style="display: flex; flex-direction: column; height: 440px;">
+        <div class="row" style="justify-content: space-between; align-items: baseline;">
+          <h3>Recall, precision and F1 by threshold</h3>
+          <span class="tiny">LightGBM, test set</span>
+        </div>
+        <div class="chart-box"><canvas id="chartThreshold"></canvas></div>
+        <p class="small" style="margin-top: 8px;">0.5 &rarr; <strong>0.4</strong>: <span class="t-good">+5 frauds caught</span> (304) for <span class="t-amber">+4 false alarms</span> (28). Highest F1: 0.884.</p>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="card fraud">
+          <span class="tag t-fraud">We hit this</span>
+          <h3>Generated data made validation look too good</h3>
+          <p class="small">Synthetic fraud (SMOTE) was created before cross-validation, so copies leaked into the check.</p>
+          <div class="row mono" style="gap: 22px; margin-top: 10px; font-size: 13px;">
+            <div>Random Forest<br>CV <strong>0.999</strong> &rarr; test <strong class="t-fraud">0.768</strong></div>
+            <div>LightGBM<br>CV <strong>0.873</strong> &rarr; test <strong class="t-good">0.881</strong></div>
+          </div>
+        </div>
+        <div class="card amber">
+          <span class="tag t-amber">We nearly fell for this</span>
+          <h3>Wins smaller than the noise</h3>
+          <p class="small">With 356 frauds, 84% Recall is uncertain by &plusmn;4 points (&asymp; &plusmn;14 frauds). Our two “wins” are 13 and 5 frauds.</p>
+        </div>
+        <p class="small"><strong>Lesson:</strong> trust only the locked test set, and treat small gaps as business choices to confirm on live data.</p>
+      </div>
+    </div>
+  </div>
+  <aside class="notes">
+    <ul>
+      <li>Threshold: the model outputs a probability; the business sets the cutoff. Like a smoke alarm's sensitivity. Optimisation without retraining.</li>
+      <li>Lecture 2 warns that generated data "may not look real". SMOTE is generated data: models trained on it scored near-perfect in cross-validation (RF 0.999, DT 0.998, LR 0.979) but much lower on the test set. Class-weighted models (XGBoost, LightGBM) had CV &asymp; test. Fix: generate synthetic examples inside each fold.</li>
+      <li>Lecture 3 "measure the noise" and Lecture 8 "same AI, three tests, three scores": 95% margin on Recall with 356 cases is about &plusmn;3.8 points. LightGBM vs XGBoost (13 frauds) and 0.4 vs 0.5 (5 frauds) sit inside it.</li>
+      <li>The final choice still holds, because it was judged on the untouched test set and on the business trade-off.</li>
+    </ul>
+  </aside>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!--  9 · DEMO                                                              -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<section class="slide" data-phase="6" data-title="Live demo">
+  <div class="body" style="align-items: center; text-align: center;">
+    <div class="kicker">Part 6 · Launch · Live demo</div>
+    <h1>See demo</h1>
+  </div>
+  <aside class="notes">
+    <ul>
+      <li>Switch to the demo window (Flask API on port 5050, Next.js dashboard on port 3000).</li>
+      <li>Suggested order: an everyday purchase (approved), a payment with the fraud fingerprint (blocked), a borderline case (show how the cutoff decides).</li>
+      <li>Backup plan: have screenshots ready in case the demo fails.</li>
+      <li>Keep it to about 2 minutes, then come back to the deck.</li>
+    </ul>
+  </aside>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!--  10 · LAUNCH                                                           -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<section class="slide" data-phase="6" data-title="Launch">
+  <div class="kicker">Part 6 · Launch</div>
+  <h2>Roll out in small steps, each with a gate</h2>
+  <p class="lead">No gate passed, no next step. Every model version can be rolled back.</p>
+
+  <div class="body">
+    <div class="row" style="align-items: stretch; gap: 10px;">
+      <div class="card tint" style="flex: 1;">
+        <div class="tiny mono">0 · Internal</div>
+        <h3 style="margin: 6px 0 8px;">Our own analysts</h3>
+        <p class="small">Test as outsiders: real cases, the review screen, the feedback buttons.</p>
+        <p class="tiny" style="margin-top: 8px;"><strong>Gate:</strong> analysts can work with it.</p>
+      </div>
+      <div class="t-burg" style="align-self: center; font-size: 20px;">&rarr;</div>
+      <div class="card burg" style="flex: 1.2;">
+        <div class="tiny mono t-burg">1 · Shadow mode &nbsp;~3 months</div>
+        <h3 style="margin: 6px 0 8px;">Score live, block nothing</h3>
+        <p class="small">Every real payment is scored, only logged. Chargebacks take up to ~60 days, so we wait before judging.</p>
+        <p class="tiny" style="margin-top: 8px;"><strong>Gate:</strong> live Recall within the test-set margin (~80%+).</p>
+      </div>
+      <div class="t-burg" style="align-self: center; font-size: 20px;">&rarr;</div>
+      <div class="card" style="flex: 1.2;">
+        <div class="tiny mono">2 · Canary &nbsp;5% &rarr; 25% &rarr; 100%</div>
+        <h3 style="margin: 6px 0 8px;">Small share first</h3>
+        <p class="small">A random share of payments is decided by the model, the rest by today's rules, in the same weeks.</p>
+        <p class="tiny" style="margin-top: 8px;"><strong>Gate:</strong> fewer losses, false alarms not worse.</p>
+      </div>
+      <div class="t-burg" style="align-self: center; font-size: 20px;">&rarr;</div>
+      <div class="card" style="flex: 1;">
+        <div class="tiny mono">3 · Full</div>
+        <h3 style="margin: 6px 0 8px;">Owned and reversible</h3>
+        <p class="small">Each version gets a number. An off switch back to rules is always ready.</p>
+        <p class="tiny" style="margin-top: 8px;"><strong>Gate:</strong> a named owner for every alert.</p>
+      </div>
+    </div>
+    <div class="row tiny mono" style="justify-content: center; gap: 30px;">
+      <span>test copy</span><span>&rarr;</span><span>pre-production copy</span><span>&rarr;</span><span>production</span>
+    </div>
+  </div>
+  <aside class="notes">
+    <ul>
+      <li>Lecture 5: release to a few people first and test as an outsider. Our first users are our own fraud analysts.</li>
+      <li>Lecture 8: the test score is only a promise (SickKids silent trial: 0.90 on old data, 0.50 on new patients). Shadow mode checks the promise on live data without affecting customers. Like Stripe, we must wait for chargebacks before the score is final.</li>
+      <li>Canary with an A/B comparison in the same weeks, not before vs after.</li>
+      <li>Lecture 6: three copies (test, pre-production, production), version numbers, and going back is normal.</li>
+      <li>The ~3 months and ~80% gate are our proposals, to be agreed with the bank.</li>
+    </ul>
+  </aside>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!--  11 · MEASURING SUCCESS                                                -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<section class="slide" data-phase="7" data-title="Measuring success">
+  <div class="kicker">Part 7 · Measuring success</div>
+  <h2>Success in money, before and after launch</h2>
+
+  <div class="body">
+    <div class="split">
+      <div class="card" style="display: flex; flex-direction: column; height: 420px;">
+        <div class="row" style="justify-content: space-between; align-items: baseline;">
+          <h3>Before launch: estimated loss from missed fraud</h3>
+          <span class="tiny">test set</span>
+        </div>
+        <div class="chart-box"><canvas id="chartLoss"></canvas></div>
+        <p class="small" style="margin-top: 6px;">Champion vs baseline: <span class="t-good">62 more frauds caught</span> &asymp; <strong>$32,120</strong> less loss, on 67,922 payments.</p>
+      </div>
+      <div class="card tint" style="display: flex; flex-direction: column; gap: 10px;">
+        <span class="tag t-burg" style="align-self: flex-start;">After launch we track</span>
+        <ul class="points" style="gap: 8px;">
+          <li style="font-size: 14px;"><strong>Fraud caught</strong>, confirmed by chargebacks ~60 days later</li>
+          <li style="font-size: 14px;"><strong>False alarms</strong> and customer complaints</li>
+          <li style="font-size: 14px;"><strong>Losses prevented</strong> per month, in money</li>
+          <li style="font-size: 14px;"><strong>By group</strong>: category, state, age, not one average</li>
+          <li style="font-size: 14px;"><strong>Analyst workload</strong>: cases in the review band per day</li>
+        </ul>
+        <div class="card fraud" style="padding: 12px 16px; margin-top: auto;">
+          <p class="small"><strong class="t-fraud">Blind spot:</strong> a blocked payment never tells us if it was fraud. A person reviews a small random sample of blocks each week.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <aside class="notes">
+    <ul>
+      <li>Before launch: Recall translated into money, the business measure from part 2. Estimated losses: Logistic Regression $61,650; Random Forest $54,915; Decision Tree $42,482; LightGBM $29,530; XGBoost $22,795. Assumption: every missed fraud is worth the average $518.</li>
+      <li>Lecture 8, "who holds the answer sheet, and when": for us, chargebacks, weeks later.</li>
+      <li>Lecture 8, averages that hide a group: report results per category, state and age group.</li>
+      <li>Blind spot: blocked payments never get a true label, so false alarms are a guess without a random audit sample.</li>
+    </ul>
+  </aside>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!--  12 · RISKS                                                            -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<section class="slide" data-phase="8" data-title="Risks">
+  <div class="kicker">Part 8 · Risks</div>
+  <h2>What could go wrong, and what we'd do</h2>
+
+  <div class="body">
+    <div class="grid-3">
+      <div class="card">
+        <span class="tag t-fraud">Fraudsters adapt</span>
+        <h3>Drift</h3>
+        <p class="small">New fraud patterns appear; the model ages. <strong>Do:</strong> drift alerts, regular retraining.</p>
+      </div>
+      <div class="card">
+        <span class="tag t-fraud">Customers hurt</span>
+        <h3>Wrong blocks</h3>
+        <p class="small">A real purchase declined abroad or at night. <strong>Do:</strong> review band, fast unblock, track complaints.</p>
+      </div>
+      <div class="card">
+        <span class="tag t-fraud">Unequal errors</span>
+        <h3>A group fares worse</h3>
+        <p class="small">Age is a top-2 feature: older customers may be blocked more. <strong>Do:</strong> results per group.</p>
+      </div>
+      <div class="card">
+        <span class="tag t-amber">Late answers</span>
+        <h3>Labels arrive weeks later</h3>
+        <p class="small">We learn about mistakes only after chargebacks. <strong>Do:</strong> wait before judging, audit sample.</p>
+      </div>
+      <div class="card">
+        <span class="tag t-amber">Personal data</span>
+        <h3>Privacy (GDPR)</h3>
+        <p class="small">Birth date, job, home location. <strong>Do:</strong> access by role, deletion on request, data in the EU.</p>
+      </div>
+      <div class="card">
+        <span class="tag t-amber">One bad input</span>
+        <h3>Errors spread</h3>
+        <p class="small">A wrong birth date or address silently corrupts age and distance. <strong>Do:</strong> input checks, fall back to rules.</p>
+      </div>
+    </div>
+  </div>
+  <aside class="notes">
+    <ul>
+      <li>Drift is guaranteed in fraud (Lecture 8: Instacart in 2020). Fraudsters react to what gets blocked.</li>
+      <li>Fairness: age is the model's #2 feature. That may be a real fraud signal, but we must check error rates per age group (Lecture 8: averages that hide a group).</li>
+      <li>Lecture 2: personal data needs an owner, access by role, and deletion "from every version, following a written process".</li>
+      <li>Lecture 6: one wrong answer spreads to many steps. A bad customer profile breaks several features at once.</li>
+      <li>From our own project: generated data and small samples can mislead (part 5).</li>
+    </ul>
+  </aside>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!--  13 · NEXT STEPS                                                       -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<section class="slide" data-phase="9" data-title="Next steps">
+  <div class="kicker">Part 9 · Next steps</div>
+  <h2>Turn every missed fraud into the next model</h2>
+
+  <div class="body">
+    <div class="split" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);">
+      <div class="card tint" style="display: flex; flex-direction: column; gap: 10px;">
+        <span class="tag t-burg" style="align-self: flex-start;">The data engine loop</span>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <div class="card fraud" style="padding: 9px 14px;"><strong>1 · The model misses a fraud</strong> <span class="small">a chargeback arrives</span></div>
+          <div class="t-burg" style="text-align: center;">&darr;</div>
+          <div class="card" style="padding: 9px 14px;"><strong>2 · Find similar payments</strong> <span class="small">same merchant, hour, amount range</span></div>
+          <div class="t-burg" style="text-align: center;">&darr;</div>
+          <div class="card" style="padding: 9px 14px;"><strong>3 · Analysts confirm</strong> <span class="small">their clicks become labels</span></div>
+          <div class="t-burg" style="text-align: center;">&darr;</div>
+          <div class="card burg" style="padding: 9px 14px;"><strong>4 · Retrain, compare to champion</strong> <span class="small">promote only a real win</span></div>
+        </div>
+        <p class="tiny" style="text-align: center;">&uarr; and again, for every new kind of fraud</p>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 12px; justify-content: center;">
+        <div class="card"><strong>Study the 57 missed frauds first</strong><p class="small">Group them by category, hour and amount; fix the biggest group.</p></div>
+        <div class="card"><strong>Version the data, not just the model</strong><p class="small">So any model in production can be traced to its exact data (e.g. DVC).</p></div>
+        <div class="card"><strong>Retrain on the bank's own payments</strong><p class="small">Replace the public dataset, then repeat shadow mode.</p></div>
+        <div class="card"><strong>Set a stop rule for each round</strong><p class="small">A target, a plateau or a budget, decided in advance.</p></div>
+      </div>
+    </div>
+    <p class="tiny" style="text-align: right;">Thank you · Questions?</p>
+  </div>
+  <aside class="notes">
+    <ul>
+      <li>Lecture 2, Tesla's data engine: model fails &rarr; find similar cases &rarr; label &rarr; retrain, repeated for every new failure. Ours starts with a chargeback.</li>
+      <li>Lecture 3: the next idea comes from the champion's mistakes, so we start with the 57 frauds LightGBM missed.</li>
+      <li>Lecture 6: people's daily work teaches the next model; a person, not a timer, decides when to retrain.</li>
+      <li>Lecture 2: "which exact data trained the model?" We save the model, scaler and feature list, but not yet a data version.</li>
+      <li>Lecture 3 stop rules: target, plateau or budget.</li>
+      <li>Close: the hard part of this AI project was not the algorithm. It was the decisions before and after it.</li>
+    </ul>
+  </aside>
+</section>
+
+</div>
+
+<!-- Controls & speaker notes -->
+<div class="controls">
+  <button id="btnPrev" title="Previous (←)">&larr;</button>
+  <button id="btnNext" title="Next (→)">&rarr;</button>
+  <button id="btnNotes" title="Speaker notes (N)">Notes</button>
+  <button id="btnFull" title="Fullscreen (F)">Full</button>
+</div>
+<div class="notes-panel" id="notesPanel">
+  <div class="np-title" id="notesTitle"></div>
+  <div id="notesBody"></div>
+</div>
+
+<script>
+// ── Slide engine ────────────────────────────────────────────────────────
+const slides = Array.from(document.querySelectorAll('.slide'));
+// The nine parts of the group-project brief
+const PHASES = ['Problem', 'Scope', 'Data', 'System', 'Build & test', 'Launch', 'Measure', 'Risks', 'Next steps'];
+
+// Inject the brief tracker and footer into each slide
+slides.forEach((s, i) => {
+  const phase = parseInt(s.dataset.phase, 10);
+  if (phase) {
+    const tr = document.createElement('div');
+    tr.className = 'tracker';
+    tr.innerHTML = PHASES.map((label, j) => {
+      const n = j + 1;
+      const cls = n < phase ? ' done' : n === phase ? ' current' : '';
+      return (j ? '<span class="bar"></span>' : '') +
+        `<span class="step${cls}"><span class="dot"></span>${n} ${label}</span>`;
+    }).join('');
+    s.prepend(tr);
+  }
+  const ft = document.createElement('div');
+  ft.className = 'slide-footer';
+  ft.innerHTML = `<span>Catching Fraud · AI Project Management</span><span>${i + 1} / ${slides.length}</span>`;
+  s.appendChild(ft);
+});
+
+function fit() {
+  const s = Math.min(window.innerWidth / 1280, window.innerHeight / 720) * 0.96;
+  document.documentElement.style.setProperty('--scale', s);
+}
+window.addEventListener('resize', fit);
+fit();
+
+let current = 0;
+const notesPanel = document.getElementById('notesPanel');
+function show(n) {
+  current = Math.max(0, Math.min(slides.length - 1, n));
+  slides.forEach((s, i) => s.classList.toggle('active', i === current));
+  const notes = slides[current].querySelector('.notes');
+  document.getElementById('notesTitle').textContent =
+    `SPEAKER NOTES · ${current + 1} · ${slides[current].dataset.title || ''}`;
+  document.getElementById('notesBody').innerHTML = notes ? notes.innerHTML : '';
+  history.replaceState(null, '', '#' + (current + 1));
+}
+
+document.addEventListener('keydown', e => {
+  if (['ArrowRight', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); show(current + 1); }
+  else if (['ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); show(current - 1); }
+  else if (e.key === 'Home') show(0);
+  else if (e.key === 'End') show(slides.length - 1);
+  else if (e.key === 'n' || e.key === 'N') notesPanel.classList.toggle('open');
+  else if (e.key === 'f' || e.key === 'F') toggleFull();
+});
+function toggleFull() {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else document.exitFullscreen();
+}
+document.getElementById('btnPrev').onclick = () => show(current - 1);
+document.getElementById('btnNext').onclick = () => show(current + 1);
+document.getElementById('btnNotes').onclick = () => notesPanel.classList.toggle('open');
+document.getElementById('btnFull').onclick = toggleFull;
+
+show(parseInt(location.hash.slice(1), 10) - 1 || 0);
+
+// ── Charts ──────────────────────────────────────────────────────────────
+if (window.Chart) {
+  Chart.defaults.color = '#75696d';
+  Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
+  Chart.defaults.font.size = 12;
+  Chart.defaults.borderColor = 'rgba(42, 32, 36, 0.08)';
+  Chart.defaults.devicePixelRatio = 2;
+  Chart.defaults.maintainAspectRatio = false;
+  Chart.defaults.plugins.legend.labels.boxWidth = 12;
+
+  const FRAUD = '#c8323a', GOOD = '#2f7d52', BURG = '#8a1538', GREY = '#cdbfae';
+
+  // Fraud rate by hour: computed from the full dataset
+  const hourRate = [1.52, 1.49, 1.27, 1.27, 0.06, 0.09, 0.06, 0.08, 0.11, 0.10, 0.09, 0.05,
+                    0.10, 0.08, 0.09, 0.13, 0.13, 0.12, 0.11, 0.06, 0.13, 0.10, 2.59, 2.62];
+  new Chart(document.getElementById('chartHour'), {
+    type: 'bar',
+    data: {
+      labels: hourRate.map((_, h) => String(h).padStart(2, '0')),
+      datasets: [{ data: hourRate, backgroundColor: hourRate.map(v => v > 1 ? FRAUD : GREY), borderRadius: 3 }]
+    },
+    options: {
+      plugins: { legend: { display: false },
+        tooltip: { callbacks: { title: i => i[0].label + ':00', label: c => c.raw + '% fraud' } } },
+      scales: {
+        y: { ticks: { callback: v => v + '%' } },
+        x: { grid: { display: false }, ticks: { maxRotation: 0 } }
+      }
+    }
+  });
+
+  // Feature importance: LightGBM, top features from the notebook output
+  const featNames = ['Amount', 'Customer age', 'Distance to merchant', 'Hour of day', 'Merchant latitude', 'Merchant longitude', 'City population'];
+  const featScore = [3603, 2575, 2563, 2073, 1922, 1879, 1790];
+  const engineered = [false, true, true, true, false, false, false];
+  new Chart(document.getElementById('chartImportance'), {
+    type: 'bar',
+    data: { labels: featNames,
+      datasets: [{ data: featScore, backgroundColor: engineered.map(e => e ? BURG : GREY), borderRadius: 3 }] },
+    options: {
+      indexAxis: 'y',
+      plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: c => c.raw.toLocaleString('en-US') + (engineered[c.dataIndex] ? ' · engineered by us' : ' · raw column') } } },
+      scales: { x: { ticks: { display: false }, grid: { display: false } }, y: { grid: { display: false } } }
+    }
+  });
+
+  // Threshold optimisation: LightGBM
+  const thr = ['0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7'];
+  const pt = (arr, color) => ({
+    pointBackgroundColor: arr.map((_, i) => i === 3 ? color : '#fff'),
+    pointBorderColor: color, pointRadius: arr.map((_, i) => i === 3 ? 6 : 3)
+  });
+  const rec = [0.8708, 0.8680, 0.8596, 0.8539, 0.8399, 0.8287, 0.8230];
+  const pre = [0.8732, 0.8957, 0.9027, 0.9157, 0.9257, 0.9306, 0.9421];
+  const f1  = [0.8720, 0.8816, 0.8806, 0.8837, 0.8807, 0.8767, 0.8786];
+  new Chart(document.getElementById('chartThreshold'), {
+    type: 'line',
+    data: {
+      labels: thr,
+      datasets: [
+        { label: 'Recall (fraud caught)', data: rec, borderColor: FRAUD, borderWidth: 2.5, tension: 0.3, ...pt(rec, FRAUD) },
+        { label: 'Precision (alarms that were real)', data: pre, borderColor: GOOD, borderWidth: 2.5, tension: 0.3, ...pt(pre, GOOD) },
+        { label: 'F1', data: f1, borderColor: BURG, borderWidth: 2, borderDash: [5, 4], tension: 0.3, ...pt(f1, BURG) }
+      ]
+    },
+    options: {
+      plugins: { legend: { position: 'bottom' },
+        tooltip: { callbacks: { label: c => `${c.dataset.label}: ${c.raw.toFixed(3)}` } } },
+      scales: {
+        x: { title: { display: true, text: 'Threshold (fraud probability cutoff)' }, grid: { display: false } },
+        y: { min: 0.8, max: 0.96, ticks: { callback: v => v.toFixed(2) } }
+      }
+    }
+  });
+
+  // Estimated loss from missed fraud (missed × $518.07)
+  new Chart(document.getElementById('chartLoss'), {
+    type: 'bar',
+    data: {
+      labels: ['Logistic Regression', 'Random Forest', 'Decision Tree', 'LightGBM ★', 'XGBoost'],
+      datasets: [{ data: [61650, 54915, 42482, 29530, 22795],
+        backgroundColor: [GREY, GREY, GREY, BURG, GOOD], borderRadius: 3 }]
+    },
+    options: {
+      indexAxis: 'y',
+      plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: c => '$' + c.raw.toLocaleString('en-US') } } },
+      scales: {
+        x: { ticks: { callback: v => '$' + (v / 1000) + 'k' } },
+        y: { grid: { display: false }, ticks: { font: { size: 13 } } }
+      }
+    }
+  });
+}
+</script>
+
+</body>
+</html>
