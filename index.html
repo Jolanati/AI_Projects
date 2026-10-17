@@ -1276,8 +1276,15 @@ if (window.Chart) {
       if (k === steps.length - 1) timers.push(setTimeout(() => st.classList.remove('pl-on'), 1600));
     }, k * 1000)));
   }
-  new MutationObserver(() => { if (slide.classList.contains('active')) run(); else { close(); stopAnim(); } })
-    .observe(slide, { attributes: true, attributeFilter: ['class'] });
+  // React only when the slide is entered or left; close()/open() change the class too, so ignore those
+  let wasActive = slide.classList.contains('active');
+  new MutationObserver(() => {
+    const isActive = slide.classList.contains('active');
+    if (isActive === wasActive) return;
+    wasActive = isActive;
+    if (isActive) run(); else { close(); stopAnim(); }
+  }).observe(slide, { attributes: true, attributeFilter: ['class'] });
+  if (wasActive) run();
   steps.forEach((st, k) => st.addEventListener('click', () => open(k)));
   slide.querySelectorAll('.pl-close').forEach(btn => btn.addEventListener('click', close));
   slide.querySelector('.pl-replay').addEventListener('click', run);
