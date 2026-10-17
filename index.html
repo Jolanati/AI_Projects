@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Catching Fraud at NordPay — Pitch | RSU AI Project Management</title>
+  <title>Catching Fraud — Pitch | RSU AI Project Management</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <style>
     /* ── Light academic palette ────────────────────────────────────────── */
@@ -328,6 +328,136 @@
     :root { --fraud: #111111; --good: #0a7d5a; --amber: #6a4cc4; --teal: #0a7d5a; }
     .card.fraud, .card.amber { background: var(--card); border-color: #cfcfca; }
     .chip.sim { background: #fff; color: #111; border: 1px solid #111; }
+    /* ── Slide 7 pipeline (Ģirts' spec): prefixed .pl-, scoped to the slide ── */
+    section[data-title="AI pipeline"] .pl-body { gap: 16px; padding-top: 10px; }
+    .pl-flow { display: flex; align-items: stretch; gap: 6px; }
+    .pl-step { flex: 1; min-width: 0; background: #fff; border: 1px solid #cfcfca; padding: 10px 10px 9px;
+               display: flex; flex-direction: column; gap: 5px; transition: border-color .3s, box-shadow .3s; }
+    .pl-step h3 { font-size: 15px; margin: 0; line-height: 1.2; }
+    .pl-step.pl-model { border: 2px solid #111; }
+    .pl-num { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+    .pl-io { font-size: 11.5px; color: var(--ink-soft); line-height: 1.35; }
+    .pl-io span { font-family: var(--mono); font-size: 9.5px; letter-spacing: 1.2px; color: var(--muted); margin-right: 5px; }
+    .pl-io.pl-out { font-family: var(--mono); font-size: 11.5px; color: #111; margin-top: auto; border-top: 1px solid var(--line); padding-top: 5px; }
+    .pl-io code { font-family: var(--mono); font-size: 11px; }
+    .pl-arrow { align-self: center; color: #111; font-size: 16px; }
+    .pl-decision { flex: 0.95; align-items: center; text-align: center; }
+    .pl-diamond { width: 76px; height: 76px; margin: 2px auto 4px; background: #0b0b0b; transform: rotate(45deg);
+                  display: flex; align-items: center; justify-content: center; }
+    .pl-diamond > div { transform: rotate(-45deg); color: var(--yellow); font-size: 11px; line-height: 1.25; text-align: center; }
+    .pl-diamond b { display: block; font-size: 12px; color: #fff; }
+    .pl-decision .pl-out { text-align: center; width: 100%; }
+    .pl-step.pl-on { border-color: var(--yellow); box-shadow: 0 0 0 3px var(--yellow); }
+    .pl-bottom { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 18px; }
+    .pl-bottom > * { min-width: 0; }
+    .pl-why { padding: 14px 18px; }
+    .pl-legend { font-size: 10px; letter-spacing: 1px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+    .pl-legend i { width: 10px; height: 10px; display: inline-block; margin-left: 8px; }
+    .pl-legend i.pos, .pl-bar.pos { background: var(--good); }
+    .pl-legend i.neg, .pl-bar.neg { background: #9a9a94; }
+    .pl-why-row { display: grid; grid-template-columns: 190px 1fr 62px; align-items: center; gap: 10px; height: 25px; }
+    .pl-why-label { font-size: 13px; color: #111; }
+    .pl-why-axis { display: grid; grid-template-columns: 1fr 1fr; height: 14px; }
+    .pl-half { display: flex; }
+    .pl-left { justify-content: flex-end; border-right: 1.5px solid #111; }
+    .pl-bar { display: block; height: 14px; }
+    .pl-why-val { font-family: var(--mono); font-size: 13px; text-align: right; }
+    .pl-why-val.pos { color: var(--good); }
+    .pl-why-val.neg { color: #6b6b66; }
+    .pl-sum { margin-top: 8px; font-family: var(--mono); font-size: 11px; }
+    .pl-verdict { display: flex; flex-direction: column; gap: 9px; justify-content: center; position: relative; }
+    .pl-replay { position: absolute; right: 12px; bottom: 10px; font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
+                 background: transparent; color: #bdbdb8; border: 1px solid #555; padding: 3px 8px; cursor: pointer; }
+    .pl-replay:hover { color: var(--yellow); border-color: var(--yellow); }
+    @media print { .pl-replay { display: none; } .pl-step.pl-on { box-shadow: none; border-color: #cfcfca; } }
+    /* ── Slide 7 interactive panels ─────────────────────────────────────── */
+    .pl-step { cursor: pointer; }
+    .pl-step:hover { border-color: #111; }
+    .pl-step.pl-sel { background: var(--yellow); border-color: #111; }
+    .pl-decision .pl-num { align-self: flex-start; }
+    .pl-diamond { width: 62px; height: 62px; margin: 8px auto 10px; }
+    .pl-panels { display: contents; }
+    .pl-panel { background: #fff; border: 1px solid #cfcfca; padding: 10px 14px 12px; height: 232px; }
+    .pl-panel[hidden] { display: none; }
+    .pl-ph { display: flex; align-items: baseline; gap: 12px; margin-bottom: 8px; }
+    .pl-ph b { font-size: 17px; font-weight: 600; }
+    .pl-badge { font-family: var(--mono); font-size: 11px; background: #111; color: var(--yellow); padding: 2px 6px; }
+    .pl-desc { font-size: 12.5px; color: var(--muted); }
+    .pl-close { margin-left: auto; font-family: var(--mono); font-size: 10px; letter-spacing: 1px; background: none;
+                border: 1px solid #bbb; padding: 2px 8px; cursor: pointer; color: #555; }
+    .pl-close:hover { border-color: #111; color: #111; }
+    .pl-cols { display: grid; grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1.25fr) 18px minmax(0, 1fr); gap: 6px; height: 186px; }
+    .pl-col { background: #f1f1ee; padding: 8px 10px; overflow: hidden; }
+    .pl-carr { align-self: center; text-align: center; font-size: 16px; }
+    .pl-ct { font-family: var(--mono); font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase; margin-bottom: 6px; }
+    .pl-ct::before { content: ''; display: inline-block; width: 7px; height: 7px; background: #111; margin-right: 6px; }
+    .pl-kv { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+    .pl-kv td { padding: 3px 0; border-bottom: 1px solid #e2e2dd; }
+    .pl-kv td:first-child { font-family: var(--mono); color: var(--muted); font-size: 10.5px; padding-right: 8px; }
+    .pl-kv td:last-child { text-align: right; color: #111; }
+    .pl-code { background: #0b0b0b; color: #f0f0ea; font-family: var(--mono); font-size: 10.5px; line-height: 1.5; padding: 7px 9px; margin: 0 0 6px; white-space: pre; overflow: hidden; }
+    .pl-drop { font-family: var(--mono); font-size: 9.5px; color: var(--muted); margin-top: 6px; }
+    .pl-sub { font-family: var(--mono); font-size: 9.5px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin: 2px 0 4px; }
+    .pl-path { list-style: none; font-size: 10.5px; margin: 0; padding: 0; }
+    .pl-path li { background: #fff; padding: 2px 6px; margin-bottom: 2px; display: flex; gap: 6px; }
+    .pl-path li span { color: var(--muted); font-family: var(--mono); font-size: 9.5px; }
+    .pl-path li b { margin-left: auto; }
+    .pl-leaf { display: inline-block; font-family: var(--mono); font-size: 10px; background: #0b0b0b; color: var(--yellow); padding: 2px 7px; margin: 2px 0 4px; }
+    .pl-svg { width: 100%; height: 56px; background: #fff; display: block; }
+    .pl-big { font-size: 26px; font-weight: 600; line-height: 1.1; margin-bottom: 6px; }
+    .pl-green { color: var(--good); }
+    .pl-grid { display: grid; grid-template-columns: repeat(14, 1fr); gap: 2px; margin-bottom: 8px; }
+    .pl-grid i { display: block; height: 12px; border: 1px solid #c4c4bf; background: #fff; }
+    .pl-grid i.on { background: #111; border-color: #111; }
+    .pl-mini { display: grid; grid-template-columns: 112px 1fr 38px; gap: 6px; align-items: center; font-size: 10px; height: 13px; }
+    .pl-mini .pl-why-axis, .pl-mini .pl-bar { height: 8px; }
+    .pl-mini b { font-family: var(--mono); font-weight: 400; text-align: right; }
+    .pl-mini b.pos { color: var(--good); } .pl-mini b.neg { color: #6b6b66; }
+    .pl-verdict-box { background: #0b0b0b; color: #ddd; padding: 10px 12px; font-size: 11.5px; margin-bottom: 8px; }
+    .pl-verdict-box span { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: 1.4px; text-transform: uppercase; color: #aaa; }
+    .pl-verdict-box b { display: block; font-size: 24px; color: var(--yellow); font-weight: 600; }
+    .pl-open .pl-bottom { display: none; }
+    @media print { .pl-panel { display: none !important; } .pl-bottom { display: grid !important; } .pl-step.pl-sel { background: #fff; } }
+    /* README §3: values >= 13 px, headings >= 18 px; towards fraud = --fraud (Block), towards legit = --good */
+    .pl-flow { gap: 4px; }
+    .pl-arrow { font-size: 14px; }
+    .pl-step { padding: 9px 9px 8px; gap: 5px; }
+    .pl-step h3 { font-size: 18px; line-height: 1.15; }
+    .pl-num { font-size: 13px; }
+    .pl-io { font-size: 13px; line-height: 1.3; }
+    .pl-io span { font-size: 11px; }
+    .pl-io.pl-out { font-family: inherit; font-size: 13px; }
+    .pl-io.pl-out b { font-family: var(--mono); font-weight: 600; }
+    .pl-io code { font-size: 12.5px; }
+    .pl-diamond { width: 70px; height: 70px; margin: 6px auto 10px; }
+    .pl-diamond > div, .pl-diamond b { font-size: 13px; }
+    .pl-legend { font-size: 12px; }
+    .pl-legend i.pos, .pl-bar.pos { background: var(--fraud); }
+    .pl-legend i.neg, .pl-bar.neg { background: var(--good); }
+    .pl-why-val.pos, .pl-mini b.pos { color: var(--fraud); }
+    .pl-why-val.neg, .pl-mini b.neg { color: var(--good); }
+    .pl-why-row { height: 26px; }
+    .pl-why-label, .pl-why-val { font-size: 14px; }
+    .pl-sum { font-size: 13px; }
+    .pl-replay, .pl-close { font-size: 12px; }
+    .pl-panel { height: 236px; }
+    .pl-ph b { font-size: 18px; }
+    .pl-desc { font-size: 13px; }
+    .pl-cols { height: 188px; }
+    .pl-ct { font-size: 11px; }
+    .pl-kv { font-size: 13px; }
+    .pl-kv td { padding: 2px 0; }
+    .pl-kv td:first-child { font-size: 12px; }
+    .pl-code { font-size: 12px; line-height: 1.4; }
+    .pl-drop, .pl-sub { font-size: 11px; }
+    .pl-path { font-size: 13px; }
+    .pl-path li span { font-size: 11px; }
+    .pl-leaf { font-size: 12px; }
+    .pl-svg { height: 44px; }
+    .pl-green { color: var(--fraud); }
+    .pl-mini { font-size: 13px; height: 18px; grid-template-columns: 170px 1fr 52px; }
+    .pl-mini .pl-why-axis, .pl-mini .pl-bar { height: 10px; }
+    .pl-verdict-box { font-size: 13px; }
   </style>
 </head>
 <body>
@@ -346,10 +476,10 @@
     </div>
     <div class="callout" style="max-width: 820px;">
       A model that always says “not fraud” is right 99.5% of the time, because fraud is that rare.
-      <span class="small">Our project: an AI that actually catches it, running every day at NordPay.</span>
+      <span class="small">Our project: an AI that actually catches it, running every day in our company.</span>
     </div>
     <div style="margin-top: 10px; padding-top: 18px; border-top: 1px solid var(--line);">
-      <h1 style="font-size: 44px; margin-bottom: 10px;">Catching Fraud <span class="hl">at NordPay</span></h1>
+      <h1 style="font-size: 44px; margin-bottom: 10px;">Catching <span class="hl" style="margin-left: 0;">Fraud</span></h1>
       <div style="font-size: 15px; color: var(--ink-soft); display: flex; flex-wrap: wrap; gap: 6px 26px;">
         <span>Girts Ziemanis</span><span>Ugis Rutins</span><span>Maris Zelcs</span>
         <span>Ruslans Muhitovs</span><span>Evija Sturmane</span><span>Jolanta Stutane</span>
@@ -361,11 +491,11 @@
     <ul>
       <li>(~20 s) "Imagine a fraud detector that is 99.5% accurate. Sounds great? It catches zero fraud."</li>
       <li>Only about 0.5% of card payments are fraud, so a model that always says "not fraud" is right 99.5% of the time, and useless.</li>
-      <li>"We are the AI team at NordPay, a Baltic card issuer. In the next minutes we show you how our AI catches fraud every day: our data, why it needs AI, how we built it, and how it runs."</li>
+      <li>"We are the AI team of a card issuer. In the next minutes we show you how our AI catches fraud every day: our data, why it needs AI, how we built it, and how it runs."</li>
     </ul>
     </div>
     <div class="more">
-      <p><strong>The setting.</strong> NordPay is a fictional Baltic card issuer. The process we show (daily data, real-time scoring, analyst reviews, nightly retraining by an AI agent) is how a modern company would run fraud detection. The model results we quote were measured on our prototype dataset, which is said once on the data slide.</p>
+      <p><strong>The setting.</strong> We present ourselves as the AI team of a card-issuing company (an imagined company, as the brief allows). The process we show (daily data, real-time scoring, analyst reviews, nightly retraining by an AI agent) is how a modern company would run fraud detection. The model results we quote were measured on our prototype dataset, which is said once on the data slide.</p>
       <p><strong>Why accuracy misleads here.</strong> In our prototype data only 1,782 of 339,607 payments are fraud (0.52%). A model that answers "not fraud" every time is correct 99.48% of the time, yet never stops a single fraudster. Accuracy counts every correct answer equally, so when one class is tiny the big class dominates the score.</p>
       <p><strong>What we measure instead.</strong> Recall (the share of real fraud we catch), false alarms as a guardrail (we must not block every customer), and money as the business measure. Every number later in the pitch is one of these three.</p>
     </div>
@@ -378,14 +508,14 @@
 <section class="slide" data-phase="1" data-title="The problem">
   <div class="kicker">Problem · Who pays for fraud</div>
   <h2>Every missed fraud is<br><span class="hl">money gone</span></h2>
-  <p class="lead">NordPay wants to stop fraudulent card payments before customers lose money.</p>
+  <p class="lead">Our company, a card issuer, wants to stop fraudulent card payments before customers lose money.</p>
 
   <div class="body">
     <div class="grid-2">
       <div class="card fraud">
         <span class="tag t-fraud">Missed fraud</span>
         <h3>Fraud &rarr; approved</h3>
-        <p class="small">The money is gone. Average fraud payment: <strong class="t-fraud">$518</strong>. NordPay handles the chargeback and loses trust.</p>
+        <p class="small">The money is gone. Average fraud payment: <strong class="t-fraud">$518</strong>. The company handles the chargeback and loses trust.</p>
         <div class="num t-fraud" style="font-size: 30px; margin-top: 14px;">Expensive</div>
       </div>
       <div class="card amber">
@@ -398,7 +528,7 @@
     <div class="grid-3">
       <div class="card"><span class="tag t-burg">Cardholder</span><h3>No friction, no loss</h3><p class="small">Pays easily and never loses money to a stolen card.</p></div>
       <div class="card"><span class="tag t-burg">Fraud analyst</span><h3>Few, well-chosen cases</h3><p class="small">Reviews flagged payments, not thousands of alerts.</p></div>
-      <div class="card"><span class="tag t-burg">NordPay</span><h3>Fewer losses</h3><p class="small">Happy customers and satisfied regulators.</p></div>
+      <div class="card"><span class="tag t-burg">The company</span><h3>Fewer losses</h3><p class="small">Happy customers and satisfied regulators.</p></div>
     </div>
   </div>
   <aside class="notes">
@@ -406,7 +536,7 @@
     <ul>
       <li>(~40 s) Two possible mistakes with very different prices. A missed fraud is real money lost (on average $518) plus a chargeback and lost trust. A false alarm is a genuine payment held until an analyst releases it.</li>
       <li>So our goal: catch as much fraud as possible, while keeping false alarms low. "When in doubt, stop the payment."</li>
-      <li>Three users: the cardholder, the fraud analyst who reviews cases, and NordPay, which pays for the losses.</li>
+      <li>Three users: the cardholder, the fraud analyst who reviews cases, and the company, which pays for the losses.</li>
     </ul>
     </div>
     <div class="more">
@@ -453,7 +583,7 @@
     <div class="more">
       <p><strong>How we tested the rules.</strong> Both rules were applied to the same locked test set of our prototype dataset as the model: 67,922 payments, 356 of them fraud. The night window is 22:00–03:59.</p>
       <p><strong>Why the model wins.</strong> A rule looks at one or two signals and draws a hard line. Fraud rarely shows up in one signal; it shows up in combinations, for example a mid-sized online purchase late at night by an older customer. The model weighs all inputs together and learns these combinations from past payments.</p>
-      <p><strong>Why it matters over time.</strong> Fraudsters adapt to whatever gets blocked. A rule set has to be rewritten by hand; a model is retrained on newly confirmed fraud. The score from 0 to 1 also lets NordPay treat payments differently: low-risk payments pass smoothly, flagged ones go to an analyst for review.</p>
+      <p><strong>Why it matters over time.</strong> Fraudsters adapt to whatever gets blocked. A rule set has to be rewritten by hand; a model is retrained on newly confirmed fraud. The score from 0 to 1 also lets the company treat payments differently: low-risk payments pass smoothly, flagged ones go to an analyst for review.</p>
       <p><strong>Honest caveat.</strong> These are simple illustrative rules, not a tuned rule engine. Real rule sets are stronger, but they hit the same limit: every rule is written by a person and checks a fixed combination.</p>
     </div>
   </aside>
@@ -564,7 +694,7 @@
       <p><strong>From pattern to signal.</strong> This step is called feature engineering: the 15 raw columns of the prototype data became 39 model inputs. All numbers on this slide are computed from the full prototype dataset.</p>
       <p><strong>The findings.</strong> Night: fraud rate 1.92% at night vs 0.10% in the daytime, about 19 times higher. Amount: medians $356 vs $46; 47% of frauds are above $500; the model also uses the logarithm of the amount to tame the range up to $28,000. Category: online shopping 1.44%, in-store grocery 1.32%, online miscellaneous 1.28% vs 0.15% for home goods. Age: 0.72% for customers over 60 vs 0.35% for 30–45 year olds.</p>
       <p><strong>The failed assumption.</strong> We calculated the distance between home and merchant for every payment: 75.6 km on average for both fraud and normal payments. We kept the feature, but the lesson is to test intuition with data.</p>
-      <p><strong>Added in production.</strong> Live data gives behaviour signals the prototype data does not have: velocity (payments per card in the last hour), a new device or new country, spending compared with this customer's usual pattern, and the merchant's recent fraud rate. These are the strongest signals in modern fraud detection, because most fraud today is online and mobile, where a stolen card behaves differently from its owner. They are part of the NordPay plan, not of our prototype results.</p>
+      <p><strong>Added in production.</strong> Live data gives behaviour signals the prototype data does not have: velocity (payments per card in the last hour), a new device or new country, spending compared with this customer's usual pattern, and the merchant's recent fraud rate. These are the strongest signals in modern fraud detection, because most fraud today is online and mobile, where a stolen card behaves differently from its owner. They are part of the company plan, not of our prototype results.</p>
     </div>
   </aside>
 </section>
@@ -624,18 +754,171 @@
 <!--  7 · AI PIPELINE: ONE PAYMENT                                          -->
 <!-- ════════════════════════════════════════════════════════════════════════ -->
 <section class="slide" data-phase="4" data-title="AI pipeline">
-  <div class="body center" style="align-items: center; text-align: center;">
-    <div class="kicker">Build · Pipeline · Live</div>
-    <h1>The AI <span class="hl">pipeline</span></h1>
-    <p class="lead" style="margin-top: 14px;">Interactive walkthrough by Ģirts</p>
-    <div class="row" style="justify-content: center; gap: 12px; margin-top: 26px;"><span class="btn primary">&#9654; Open AI pipeline</span><span class="btn">Live · localhost</span></div>
+  <div class="kicker">Build · Pipeline</div>
+  <h2>From payment to verdict<br><span class="hl">in six steps</span></h2>
+
+  <div class="body pl-body">
+    <div class="pl-flow">
+      <div class="pl-step" data-step="0">
+        <div class="pl-num">01</div>
+        <h3>Payment arrives</h3>
+        <div class="pl-io"><span>IN</span>card payment, 14 fields</div>
+        <div class="pl-io pl-out"><span>OUT</span>Best Buy · $2,334.03 · 23:29 · online · Seattle, WA</div>
+      </div>
+      <div class="pl-arrow">&rarr;</div>
+      <div class="pl-step" data-step="1">
+        <div class="pl-num">02</div>
+        <h3>Check the request</h3>
+        <div class="pl-io"><span>IN</span>14 fields</div>
+        <div class="pl-io pl-out"><span>OUT</span>10 / 10 required fields present ✓</div>
+      </div>
+      <div class="pl-arrow">&rarr;</div>
+      <div class="pl-step" data-step="2">
+        <div class="pl-num">03</div>
+        <h3>Feature engineering</h3>
+        <div class="pl-io"><span>IN</span>time, date of birth, home + shop location, amount</div>
+        <div class="pl-io pl-out"><span>OUT</span>hour <b>23</b> · age <b>78</b> · distance <b>1,757 km</b> · log-amount <b>7.76</b></div>
+      </div>
+      <div class="pl-arrow">&rarr;</div>
+      <div class="pl-step" data-step="3">
+        <div class="pl-num">04</div>
+        <h3>Encode categories</h3>
+        <div class="pl-io"><span>IN</span>category <code>shopping_net</code>, state <code>WA</code></div>
+        <div class="pl-io pl-out"><span>OUT</span>27 yes/no columns, 2 of them = 1 → <b>39 inputs</b></div>
+      </div>
+      <div class="pl-arrow">&rarr;</div>
+      <div class="pl-step pl-model" data-step="4">
+        <div class="pl-num">05</div>
+        <h3>LightGBM model</h3>
+        <div class="pl-io"><span>IN</span>39 numbers</div>
+        <div class="pl-io pl-out"><span>OUT</span>300 trees add up a score <b>+6.50</b> → sigmoid → <b>99.85 %</b></div>
+      </div>
+      <div class="pl-arrow">&rarr;</div>
+      <div class="pl-step pl-decision" data-step="5">
+        <div class="pl-num">06</div>
+        <div class="pl-diamond"><div><b>Decision</b><span>p &ge; 0.5 ?</span></div></div>
+        <div class="pl-io pl-out"><span>OUT</span><b>Block &rarr; analyst review</b></div>
+      </div>
+    </div>
+
+    <div class="pl-panels">
+      <div class="pl-panel" data-panel="0" hidden>
+        <div class="pl-ph"><span class="pl-badge">01</span><b>Payment arrives</b><span class="pl-desc">One card payment reaches the API as a JSON request.</span><button type="button" class="pl-close" tabindex="-1">&times; close</button></div>
+        <div class="pl-cols">
+          <div class="pl-col"><div class="pl-ct">Data in</div><table class="pl-kv"><tr><td>merchant</td><td>Best Buy</td></tr><tr><td>category</td><td>shopping_net</td></tr><tr><td>amount</td><td>$2,334.03</td></tr><tr><td>time</td><td>2026-10-17 23:29</td></tr><tr><td>cardholder</td><td>born 1947-12-13, Seattle, WA</td></tr></table></div>
+          <div class="pl-carr">&rarr;</div>
+          <div class="pl-col"><div class="pl-ct">Process</div><pre class="pl-code">POST /explain
+{ 14 fields }</pre></div>
+          <div class="pl-carr">&rarr;</div>
+          <div class="pl-col"><div class="pl-ct">Data out</div><table class="pl-kv"><tr><td>fields received</td><td>14</td></tr><tr><td>channel</td><td>online</td></tr><tr><td>sent to</td><td>step 02</td></tr></table></div>
+        </div>
+      </div>
+      <div class="pl-panel" data-panel="1" hidden>
+        <div class="pl-ph"><span class="pl-badge">02</span><b>Check the request</b><span class="pl-desc">The API checks that every field the model needs is present.</span><button type="button" class="pl-close" tabindex="-1">&times; close</button></div>
+        <div class="pl-cols">
+          <div class="pl-col"><div class="pl-ct">Data in</div><table class="pl-kv"><tr><td>fields received</td><td>14</td></tr><tr><td>required</td><td>10</td></tr></table></div>
+          <div class="pl-carr">&rarr;</div>
+          <div class="pl-col"><div class="pl-ct">Process</div><pre class="pl-code">for field in required:
+    assert field in request</pre></div>
+          <div class="pl-carr">&rarr;</div>
+          <div class="pl-col"><div class="pl-ct">Data out</div><table class="pl-kv"><tr><td>present</td><td>10 / 10 ✓</td></tr><tr><td>missing</td><td>none</td></tr><tr><td>result</td><td>accepted</td></tr></table></div>
+        </div>
+      </div>
+      <div class="pl-panel" data-panel="2" hidden>
+        <div class="pl-ph"><span class="pl-badge">03</span><b>Feature engineering</b><span class="pl-desc">Raw fields become the signals the model was trained on.</span><button type="button" class="pl-close" tabindex="-1">&times; close</button></div>
+        <div class="pl-cols">
+          <div class="pl-col"><div class="pl-ct">Data in</div><table class="pl-kv"><tr><td>time</td><td>2026-10-17 23:29:20</td></tr><tr><td>date of birth</td><td>1947-12-13</td></tr><tr><td>home + shop</td><td>coordinates</td></tr><tr><td>amount</td><td>$2,334.03</td></tr></table></div>
+          <div class="pl-carr">&rarr;</div>
+          <div class="pl-col"><div class="pl-ct">Process</div><pre class="pl-code">hour        = dt.hour
+day_of_week = dt.dayofweek
+age         = (dt - dob).days // 365
+distance_km = haversine(home, shop)
+log_amt     = ln(1 + amt)</pre></div>
+          <div class="pl-carr">&rarr;</div>
+          <div class="pl-col"><div class="pl-ct">Data out</div><table class="pl-kv"><tr><td>hour</td><td>23</td></tr><tr><td>day of week</td><td>5</td></tr><tr><td>age</td><td>78 years</td></tr><tr><td>distance</td><td>1,757.22 km</td></tr><tr><td>log_amt</td><td>7.7558</td></tr></table><p class="pl-drop">dropped: <s>trans_date_trans_time</s> <s>dob</s> <s>merchant</s> <s>city</s> <s>trans_num</s> <s>job</s></p></div>
+        </div>
+      </div>
+      <div class="pl-panel" data-panel="3" hidden>
+        <div class="pl-ph"><span class="pl-badge">04</span><b>Encode categories</b><span class="pl-desc">Words become yes/no columns the model can read.</span><button type="button" class="pl-close" tabindex="-1">&times; close</button></div>
+        <div class="pl-cols">
+          <div class="pl-col"><div class="pl-ct">Data in</div><table class="pl-kv"><tr><td>category</td><td><code>shopping_net</code></td></tr><tr><td>state</td><td><code>WA</code></td></tr></table></div>
+          <div class="pl-carr">&rarr;</div>
+          <div class="pl-col"><div class="pl-ct">Process</div><pre class="pl-code">one column per category (14)
+one column per state    (13)
+= 27 yes/no columns</pre></div>
+          <div class="pl-carr">&rarr;</div>
+          <div class="pl-col"><div class="pl-ct">Data out</div><div class="pl-grid"><i class="" title="category_entertainment"></i><i class="" title="category_food_dining"></i><i class="" title="category_gas_transport"></i><i class="" title="category_grocery_net"></i><i class="" title="category_grocery_pos"></i><i class="" title="category_health_fitness"></i><i class="" title="category_home"></i><i class="" title="category_kids_pets"></i><i class="" title="category_misc_net"></i><i class="" title="category_misc_pos"></i><i class="" title="category_personal_care"></i><i class="on" title="category_shopping_net"></i><i class="" title="category_shopping_pos"></i><i class="" title="category_travel"></i><i class="" title="state_AK"></i><i class="" title="state_AZ"></i><i class="" title="state_CA"></i><i class="" title="state_CO"></i><i class="" title="state_HI"></i><i class="" title="state_ID"></i><i class="" title="state_MO"></i><i class="" title="state_NE"></i><i class="" title="state_NM"></i><i class="" title="state_OR"></i><i class="" title="state_UT"></i><i class="on" title="state_WA"></i><i class="" title="state_WY"></i></div><table class="pl-kv"><tr><td>active</td><td>category_shopping_net · state_WA</td></tr><tr><td>model inputs</td><td>12 numbers + 27 = <b>39</b></td></tr></table></div>
+        </div>
+      </div>
+      <div class="pl-panel" data-panel="4" hidden>
+        <div class="pl-ph"><span class="pl-badge">05</span><b>LightGBM model</b><span class="pl-desc">300 trees add up a raw score; the sigmoid turns it into a probability.</span><button type="button" class="pl-close" tabindex="-1">&times; close</button></div>
+        <div class="pl-cols">
+          <div class="pl-col"><div class="pl-ct">Data in</div><table class="pl-kv"><tr><td>amt</td><td>2,334</td></tr><tr><td>city_pop</td><td>99</td></tr><tr><td>hour</td><td>23</td></tr><tr><td>day_of_week</td><td>5</td></tr><tr><td>month</td><td>10</td></tr><tr><td>age</td><td>78</td></tr></table><p class="pl-drop">+ 4 coordinates + 27 yes/no columns = 39 values</p></div>
+          <div class="pl-carr">&rarr;</div>
+          <div class="pl-col"><div class="pl-ct">Process</div><div class="pl-sub">Tree #1 of 300: the path this payment took</div><ol class="pl-path"><li>Is log_amt ≤ 5.434? <span>value 7.756</span> <b>No</b></li><li>Is category_travel ≤ 0? <span>value 0</span> <b>Yes</b></li><li>Is log_amt ≤ 5.59? <span>value 7.756</span> <b>No</b></li></ol><div class="pl-leaf">leaf value +4.03</div><div class="pl-sub">Sum of all trees = raw score</div><svg class="pl-svg" viewBox="0 0 230 70"><line x1="8" y1="62.0" x2="222" y2="62.0" stroke="#bbb" stroke-dasharray="3 3"/><polyline points="8.7,30.9 11.6,30.3 15.1,29.1 25.8,25.7 43.7,21.2 79.3,15.4 115.0,13.0 150.7,12.3 186.3,13.4 222.0,11.9" fill="none" stroke="#7b5cd6" stroke-width="2"/><circle cx="222.0" cy="11.9" r="3.5" fill="#7b5cd6"/><text x="220" y="5.9" text-anchor="end" font-size="9" font-family="monospace">final +6.50</text><text x="10" y="59.0" font-size="8" font-family="monospace" fill="#888">score 0 = 50 %</text></svg></div>
+          <div class="pl-carr">&rarr;</div>
+          <div class="pl-col"><div class="pl-ct">Data out</div><div class="pl-sub">Raw score (log-odds)</div><div class="pl-big">+6.4959</div><pre class="pl-code">p = 1 / (1 + e^(-score))
+  = 0.998493</pre><div class="pl-big pl-green">99.85 %</div></div>
+        </div>
+      </div>
+      <div class="pl-panel" data-panel="5" hidden>
+        <div class="pl-ph"><span class="pl-badge">06</span><b>Decision p ≥ 0.5 ?</b><span class="pl-desc">The probability is compared with the 0.5 threshold and the verdict is returned.</span><button type="button" class="pl-close" tabindex="-1">&times; close</button></div>
+        <div class="pl-cols">
+          <div class="pl-col"><div class="pl-ct">Data in</div><table class="pl-kv"><tr><td>probability</td><td>99.85 %</td></tr><tr><td>threshold</td><td>0.50</td></tr></table></div>
+          <div class="pl-carr">&rarr;</div>
+          <div class="pl-col"><div class="pl-ct">Process</div><pre class="pl-code">if p >= 0.5:  verdict = "FRAUD"
+else:         verdict = "Legitimate"</pre><div class="pl-sub">Why? Top 5 of 39 contributions</div><div class="pl-mini"><span>Amount (log)</span><span class="pl-why-axis"><span class="pl-half pl-left"></span><span class="pl-half pl-right"><i class="pl-bar pos" style="width:100.0%"></i></span></span><b class="pos">+10.44</b></div><div class="pl-mini"><span>Hour (23:00)</span><span class="pl-why-axis"><span class="pl-half pl-left"></span><span class="pl-half pl-right"><i class="pl-bar pos" style="width:30.5%"></i></span></span><b class="pos">+3.18</b></div><div class="pl-mini"><span>Age (78)</span><span class="pl-why-axis"><span class="pl-half pl-left"></span><span class="pl-half pl-right"><i class="pl-bar pos" style="width:18.9%"></i></span></span><b class="pos">+1.97</b></div><div class="pl-mini"><span>Distance (1,757 km)</span><span class="pl-why-axis"><span class="pl-half pl-left"><i class="pl-bar neg" style="width:7.1%"></i></span><span class="pl-half pl-right"></span></span><b class="neg">&minus;0.74</b></div><div class="pl-mini"><span>Category (online)</span><span class="pl-why-axis"><span class="pl-half pl-left"></span><span class="pl-half pl-right"><i class="pl-bar pos" style="width:3.6%"></i></span></span><b class="pos">+0.37</b></div></div>
+          <div class="pl-carr">&rarr;</div>
+          <div class="pl-col"><div class="pl-ct">Data out</div><div class="pl-verdict-box"><span>Verdict</span><b>Fraud</b>Block &rarr; analyst review</div><pre class="pl-code">{ "verdict": "FRAUD",
+  "fraud_probability": 0.998493 }</pre></div>
+        </div>
+      </div>
+    </div>
+    <div class="pl-bottom">
+      <div class="card pl-why">
+        <div class="sec">Why this payment was blocked <span class="pl-legend"><i class="pos"></i>towards fraud <i class="neg"></i>towards legit</span></div>
+          <div class="pl-why-row"><span class="pl-why-label">Amount (log)</span>
+            <span class="pl-why-axis"><span class="pl-half pl-left"></span><span class="pl-half pl-right"><i class="pl-bar pos" style="width: 100.0%;"></i></span></span>
+            <span class="pl-why-val pos">+10.44</span></div>
+          <div class="pl-why-row"><span class="pl-why-label">Hour (23:00)</span>
+            <span class="pl-why-axis"><span class="pl-half pl-left"></span><span class="pl-half pl-right"><i class="pl-bar pos" style="width: 30.5%;"></i></span></span>
+            <span class="pl-why-val pos">+3.18</span></div>
+          <div class="pl-why-row"><span class="pl-why-label">Age (78)</span>
+            <span class="pl-why-axis"><span class="pl-half pl-left"></span><span class="pl-half pl-right"><i class="pl-bar pos" style="width: 18.9%;"></i></span></span>
+            <span class="pl-why-val pos">+1.97</span></div>
+          <div class="pl-why-row"><span class="pl-why-label">Distance (1,757 km)</span>
+            <span class="pl-why-axis"><span class="pl-half pl-left"><i class="pl-bar neg" style="width: 7.1%;"></i></span><span class="pl-half pl-right"></span></span>
+            <span class="pl-why-val neg">−0.74</span></div>
+          <div class="pl-why-row"><span class="pl-why-label">Category (online shopping)</span>
+            <span class="pl-why-axis"><span class="pl-half pl-left"></span><span class="pl-half pl-right"><i class="pl-bar pos" style="width: 3.6%;"></i></span></span>
+            <span class="pl-why-val pos">+0.37</span></div>
+        <p class="tiny pl-sum">Starting value &minus;9.23 + contributions of all 39 inputs = score +6.50 &rarr; 99.85 % fraud</p>
+      </div>
+      <div class="card bench pl-verdict">
+        <span class="tag">Verdict · recorded test payment</span>
+        <div class="model">FRAUD · 99.85 %</div>
+        <div class="stats">Block &rarr; analyst review<br>threshold 0.5 · score +6.50 · 300 trees</div>
+        <p class="small">Synthetic test payment, recorded from the demo API. Click any step above to open its data.</p>
+        <button type="button" class="pl-replay" tabindex="-1">&#8635; Replay</button>
+      </div>
+    </div>
   </div>
   <aside class="notes">
     <div class="say">
     <ul>
-      <li>Placeholder: Ģirts switches to the interactive AI pipeline (localhost): real-time decision, feedback loop, nightly retraining.</li>
-      <li>If localhost is unavailable, use the backup slide "Pipeline map" at the end of the deck.</li>
+      <li>(~45 s) "Let's follow one real test payment through the system: an online purchase at Best Buy, $2,334, at 23:29, by a 78-year-old cardholder."</li>
+      <li>The API first checks the request, then turns raw fields into the signals the model learned: hour 23, age 78, distance, log-amount. Categories become 27 yes/no columns, 39 numbers in total.</li>
+      <li>LightGBM's 300 small trees add up a score; the sigmoid turns it into a probability: 99.85% fraud, so the payment is blocked and goes to an analyst.</li>
+      <li>Why? Mostly the amount, the late hour and the age. Distance actually pushed towards legitimate, the same lesson as on the data slide.</li>
+      <li>"Let's see it in action."</li>
     </ul>
+    </div>
+    <div class="more">
+      <p><strong>What is shown.</strong> One recorded response of the demo API (POST /explain) for a single synthetic test payment; the slide does not call the API. Source: Ģirts' pipeline_example.json.</p>
+      <p><strong>How the score is built.</strong> Each of the 300 trees adds a small correction to a starting value (−9.23 in log-odds); the total for this payment is +6.50, and the sigmoid 1/(1+e^−score) gives 0.9985. The "why" bars are SHAP contributions computed by LightGBM itself (pred_contrib), and they add up exactly to the score.</p>
+      <p><strong>No scaling step.</strong> According to Ģirts' notes, the scaler was folded into the model's thresholds: trees only compare a value with a threshold, so predictions stay identical and the API feeds raw values, one step fewer.</p>
+      <p><strong>The decision.</strong> The live pipeline uses a single cut-off of 0.5: at 99.85% this payment is far above it and goes to manual review by an analyst, whose answer becomes labelled feedback data for the nightly retraining.</p>
+      <p><strong>Lecture 6 mapping.</strong> This slide is the "serve" step (train → export → catalogue → build → deploy → serve → watch); "watch" and retraining are covered on the launch slide.</p>
     </div>
   </aside>
 </section>
@@ -662,7 +945,7 @@
 <!--  9 · LAUNCH, MEASURE, RISKS, IMPROVE                                   -->
 <!-- ════════════════════════════════════════════════════════════════════════ -->
 <section class="slide" data-phase="6" data-title="Launch and next steps">
-  <div class="kicker">Launch &amp; next · Running it at NordPay</div>
+  <div class="kicker">Launch &amp; next · Running it in the company</div>
   <h2>How we launch it,<br><span class="hl">and keep it right</span></h2>
   <p class="lead">Prove it on live payments first, measure it in money, and keep it learning.</p>
 
@@ -704,8 +987,8 @@
     </ul>
     </div>
     <div class="more">
-      <p><strong>Launch in small steps (Lecture 8).</strong> A test score is only a promise: in the SickKids silent trial a model scored 0.90 on old data but 0.50 on new patients. Shadow mode checks the promise on NordPay's live payments without affecting customers. Analyst reviews and customer complaints give a first read within days; chargebacks complete the picture after about 60 days (Stripe faces the same delay). The canary release compares the model with today's rules in the same weeks, not before vs after.</p>
-      <p><strong>Measure in money.</strong> On the prototype test set the champion catches 62 more frauds than the baseline; at the average fraud value of $518 that is about $32,120 less loss on 67,922 payments. Live KPIs: fraud caught, false alarms and complaints, losses prevented per month, analyst workload, results per customer group, and how often analysts overturn the model's flags (step 09 in the pipeline gives us this for every flagged payment).</p>
+      <p><strong>Launch in small steps (Lecture 8).</strong> A test score is only a promise: in the SickKids silent trial a model scored 0.90 on old data but 0.50 on new patients. Shadow mode checks the promise on the company's live payments without affecting customers. Analyst reviews and customer complaints give a first read within days; chargebacks complete the picture after about 60 days (Stripe faces the same delay). The canary release compares the model with today's rules in the same weeks, not before vs after.</p>
+      <p><strong>Measure in money.</strong> On the prototype test set the champion catches 62 more frauds than the baseline; at the average fraud value of $518 that is about $32,120 less loss on 67,922 payments. Live KPIs: fraud caught, false alarms and complaints, losses prevented per month, analyst workload, results per customer group, and how often analysts overturn the model's flags (step 07 in the pipeline gives us this for every flagged payment).</p>
       <p><strong>Main risks.</strong> Drift: fraud patterns change, so the model ages (Lecture 8: Instacart in 2020). Wrong blocks hurt real customers. Unequal errors: age is one of the strongest signals, so error rates are checked per age group. Privacy: birth dates and home locations fall under GDPR (access by role, deletion on request, a documented model). One bad input, such as a wrong address, can corrupt several signals, so inputs are checked and rules are the fallback.</p>
       <p><strong>Improve every night (Lecture 2, the data engine).</strong> Every analyst review and customer complaint becomes a label. At 02:00 an AI agent retrains a candidate and compares it with the production benchmark; a data scientist signs off before release, and larger changes can still go through shadow mode first. First targets: study the 57 frauds the prototype missed, and add the behaviour signals from live data.</p>
       <p><strong>Closing line.</strong> "The hard part was not the algorithm. It was the decisions before and after it." Then open for questions; the backup deck has every detail.</p>
@@ -727,16 +1010,16 @@
       <div style="width: 170px; flex-shrink: 0;">
         <span class="tag t-fraud">Every payment</span>
         <h3 style="font-size: 18px;">Real-time decision</h3>
-        <p class="tiny">steps 01–08, in milliseconds</p>
+        <p class="tiny">steps 01–06, in milliseconds</p>
       </div>
       <div class="row" style="flex: 1; gap: 8px; align-items: stretch;">
         <div class="card tint" style="flex: 1; padding: 10px 12px;"><div class="tiny mono">Intake</div><p class="small" style="margin-top: 4px;"><strong>01</strong> Transaction source<br><strong>02</strong> API &amp; validation</p></div>
         <div class="t-burg" style="align-self: center;">&rarr;</div>
-        <div class="card tint" style="flex: 1.25; padding: 10px 12px;"><div class="tiny mono">Preprocessing</div><p class="small" style="margin-top: 4px;"><strong>03</strong> Feature engineering<br><strong>04</strong> One-hot encoding · <strong>05</strong> Scaling</p></div>
+        <div class="card tint" style="flex: 1.25; padding: 10px 12px;"><div class="tiny mono">Preprocessing</div><p class="small" style="margin-top: 4px;"><strong>03</strong> Feature engineering<br><strong>04</strong> One-hot encoding</p></div>
         <div class="t-burg" style="align-self: center;">&rarr;</div>
-        <div class="card burg" style="flex: 1; padding: 10px 12px;"><div class="tiny mono t-burg">Model</div><p class="small" style="margin-top: 4px;"><strong>06</strong> LightGBM<br><strong>07</strong> Fraud probability</p></div>
+        <div class="card burg" style="flex: 1; padding: 10px 12px;"><div class="tiny mono t-burg">Model</div><p class="small" style="margin-top: 4px;"><strong>05</strong> LightGBM v1.0<br>score &rarr; fraud probability</p></div>
         <div class="t-burg" style="align-self: center;">&rarr;</div>
-        <div class="card" style="flex: 1.3; padding: 10px 12px;"><div class="tiny mono">Decision · 08</div><p class="small" style="margin-top: 4px;">p &lt; 0.5 &rarr; <strong>Approve</strong><br>p &ge; 0.5 &rarr; <strong class="t-fraud">Flag as fraud</strong></p></div>
+        <div class="card" style="flex: 1.3; padding: 10px 12px;"><div class="tiny mono">Decision · 06</div><p class="small" style="margin-top: 4px;">p &lt; 0.5 &rarr; <strong>Approve</strong><br>p &ge; 0.5 &rarr; <strong class="t-fraud">Flag as fraud</strong></p></div>
       </div>
     </div>
 
@@ -745,13 +1028,13 @@
       <div style="width: 170px; flex-shrink: 0;">
         <span class="tag t-amber">Human in the loop</span>
         <h3 style="font-size: 18px;">Feedback loop</h3>
-        <p class="tiny">steps 09–11, during the day</p>
+        <p class="tiny">steps 07–09, during the day</p>
       </div>
       <div class="row" style="flex: 1; gap: 8px; align-items: stretch;">
-        <div class="card amber" style="flex: 1; padding: 10px 12px;"><div class="tiny mono t-amber">Flagged payment</div><p class="small" style="margin-top: 4px;"><strong>09</strong> Manual review by an analyst</p></div>
-        <div class="card amber" style="flex: 1; padding: 10px 12px;"><div class="tiny mono t-amber">Approved payment</div><p class="small" style="margin-top: 4px;"><strong>10</strong> Customer complaint? Reveals a missed fraud</p></div>
+        <div class="card amber" style="flex: 1; padding: 10px 12px;"><div class="tiny mono t-amber">Flagged payment</div><p class="small" style="margin-top: 4px;"><strong>07</strong> Manual review by an analyst</p></div>
+        <div class="card amber" style="flex: 1; padding: 10px 12px;"><div class="tiny mono t-amber">Approved payment</div><p class="small" style="margin-top: 4px;"><strong>08</strong> Customer complaint? Reveals a missed fraud</p></div>
         <div class="t-burg" style="align-self: center;">&rarr;</div>
-        <div class="card" style="flex: 1.3; padding: 10px 12px;"><div class="tiny mono">Every human answer</div><p class="small" style="margin-top: 4px;"><strong>11</strong> Labelled feedback data: new training examples</p></div>
+        <div class="card" style="flex: 1.3; padding: 10px 12px;"><div class="tiny mono">Every human answer</div><p class="small" style="margin-top: 4px;"><strong>09</strong> Labelled feedback data: new training examples</p></div>
       </div>
     </div>
 
@@ -760,15 +1043,15 @@
       <div style="width: 170px; flex-shrink: 0;">
         <span class="tag t-burg">Every night · 02:00</span>
         <h3 style="font-size: 18px;">Nightly retraining</h3>
-        <p class="tiny">steps 12–16, AI agent + people</p>
+        <p class="tiny">steps 10–14, AI agent + people</p>
       </div>
       <div class="row" style="flex: 1; gap: 8px; align-items: stretch;">
-        <div class="card" style="flex: 1; padding: 10px 12px;"><div class="tiny mono">AI agent</div><p class="small" style="margin-top: 4px;"><strong>12</strong> OpenClaw retrains a candidate on the new labels</p></div>
+        <div class="card" style="flex: 1; padding: 10px 12px;"><div class="tiny mono">AI agent</div><p class="small" style="margin-top: 4px;"><strong>10</strong> OpenClaw retrains a candidate on the new labels</p></div>
         <div style="align-self: center; color: var(--yellow);">&rarr;</div>
-        <div class="card" style="flex: 1; padding: 10px 12px; background: var(--yellow); border-color: var(--yellow);"><div class="tiny mono" style="color: #111;">Gate · 13</div><p class="small" style="margin-top: 4px;">Better than the production benchmark?</p></div>
+        <div class="card" style="flex: 1; padding: 10px 12px; background: var(--yellow); border-color: var(--yellow);"><div class="tiny mono" style="color: #111;">Gate · 11</div><p class="small" style="margin-top: 4px;">Better than the production benchmark?</p></div>
         <div style="align-self: center; color: var(--yellow);">&rarr;</div>
-        <div class="card burg" style="flex: 1.35; border-color: var(--yellow); padding: 10px 12px;"><div class="tiny mono t-burg">Yes</div><p class="small" style="margin-top: 4px;"><strong>14</strong> Data scientist signs off &rarr; <strong>15</strong> publish &rarr; deployed to step 06</p></div>
-        <div class="card tint" style="flex: 0.8; padding: 10px 12px;"><div class="tiny mono">No</div><p class="small" style="margin-top: 4px;"><strong>16</strong> Keep current model</p></div>
+        <div class="card burg" style="flex: 1.35; border-color: var(--yellow); padding: 10px 12px;"><div class="tiny mono t-burg">Yes</div><p class="small" style="margin-top: 4px;"><strong>12</strong> Data scientist signs off &rarr; <strong>13</strong> publish &rarr; deployed to step 05</p></div>
+        <div class="card tint" style="flex: 0.8; padding: 10px 12px;"><div class="tiny mono">No</div><p class="small" style="margin-top: 4px;"><strong>14</strong> Keep current model</p></div>
       </div>
     </div>
 
@@ -784,10 +1067,10 @@
     </ul>
     </div>
     <div class="more">
-      <p><strong>Source.</strong> This slide maps Ģirts' demo application ("How the AI pipeline makes a decision"); the step numbers 01–16 are the same as in the demo, so the audience can follow along.</p>
-      <p><strong>Real-time decision (01–08).</strong> Intake: the transaction arrives from the payment system and the API validates it (all required fields present). Preprocessing: feature engineering (for example distance to the merchant and hour of the day), one-hot encoding of categories, scaling of numeric values. Model: LightGBM returns a raw score, which is turned into a fraud probability. Decision: approve below 0.5, flag as fraud (blocked for review) at 0.5 and above. In the notebook a cutoff of 0.4 caught 5 more frauds for 4 more false alarms; that is a candidate change for a future release.</p>
-      <p><strong>Feedback loop (09–11), human in the loop.</strong> Lecture 6: people's daily work teaches the next model. Flagged payments get a manual analyst review; approved payments can be disputed by the customer, which reveals missed fraud. Both answers are stored as labelled feedback data, with the payment's features.</p>
-      <p><strong>Nightly retraining (12–16).</strong> An AI agent (OpenClaw) retrains a candidate model on the new labels at 02:00 and compares it with the production benchmark, LightGBM v1.0 (Recall 83.99%, precision 92.57%, F1 0.8807, AUC 0.9978). If the candidate is better, a data scientist gets a review task and signs off before the model is published and deployed to step 06. If not, the current model stays. This links to the agent lectures (L10–11) and to Lecture 3's champion loop: a challenger replaces the champion only when it wins.</p>
+      <p><strong>Source.</strong> This slide maps Ģirts' demo application ("How the AI pipeline makes a decision"); the step numbers 01–14 are the same as in the demo, so the audience can follow along.</p>
+      <p><strong>Real-time decision (01–06).</strong> Intake: the transaction arrives from the payment system and the API validates it (all required fields present). Preprocessing: feature engineering (for example distance to the merchant and hour of the day) and one-hot encoding of categories; scaling is folded into the model thresholds, so there is no separate step. Model (05): LightGBM returns a raw score, which the sigmoid turns into a fraud probability. Decision: approve below 0.5, flag as fraud (blocked for review) at 0.5 and above. In the notebook a cutoff of 0.4 caught 5 more frauds for 4 more false alarms; that is a candidate change for a future release.</p>
+      <p><strong>Feedback loop (07–09), human in the loop.</strong> Lecture 6: people's daily work teaches the next model. Flagged payments get a manual analyst review; approved payments can be disputed by the customer, which reveals missed fraud. Both answers are stored as labelled feedback data, with the payment's features.</p>
+      <p><strong>Nightly retraining (10–14).</strong> An AI agent (OpenClaw) retrains a candidate model on the new labels at 02:00 and compares it with the production benchmark, LightGBM v1.0 (Recall 83.99%, precision 92.57%, F1 0.8807, AUC 0.9978). If the candidate is better, a data scientist gets a review task and signs off before the model is published and deployed to step 05. If not, the current model stays. This links to the agent lectures (L10–11) and to Lecture 3's champion loop: a challenger replaces the champion only when it wins.</p>
       <p><strong>Good question to expect: "how much better is better?"</strong> With 356 fraud cases in the test set, Recall is uncertain by about ±4 points, so the gate should require a clear margin, not any improvement, and big changes can still go through shadow mode before full release (Lecture 8).</p>
     </div>
   </aside>
@@ -818,7 +1101,7 @@ slides.forEach((s, i) => {
   const phase = parseInt(s.dataset.phase, 10) || 0;
   const tr = document.createElement('div');
   tr.className = 'tracker';
-  tr.innerHTML = '<span class="brand"><i></i>Catching Fraud · NordPay</span>' +
+  tr.innerHTML = '<span class="brand"><i></i>Catching Fraud</span>' +
     PHASES.map((label, j) => {
       const n = j + 1;
       const cls = n < phase ? ' done' : n === phase ? ' current' : '';
@@ -828,7 +1111,7 @@ slides.forEach((s, i) => {
   s.prepend(tr);
   const ft = document.createElement('div');
   ft.className = 'slide-footer';
-  ft.innerHTML = `<span>Catching Fraud at NordPay · AI Project Management</span><span>${i + 1} / ${slides.length}</span>`;
+  ft.innerHTML = `<span>Catching Fraud · AI Project Management</span><span>${i + 1} / ${slides.length}</span>`;
   s.appendChild(ft);
 });
 
@@ -961,6 +1244,44 @@ if (window.Chart) {
     }
   });
 }
+// ── Slide 7: walk-through animation + click a step to open its DATA IN / PROCESS / DATA OUT panel ──
+(function () {
+  const slide = document.querySelector('section[data-title="AI pipeline"]');
+  if (!slide) return;
+  const steps = Array.from(slide.querySelectorAll('.pl-step'));
+  const panels = Array.from(slide.querySelectorAll('.pl-panel'));
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let timers = [];
+  function stopAnim() { timers.forEach(clearTimeout); timers = []; steps.forEach(x => x.classList.remove('pl-on')); }
+  function close() {
+    panels.forEach(pn => { pn.hidden = true; });
+    steps.forEach(x => x.classList.remove('pl-sel'));
+    slide.classList.remove('pl-open');
+  }
+  function open(k) {
+    stopAnim();
+    const same = steps[k].classList.contains('pl-sel');
+    close();
+    if (same) return;
+    steps[k].classList.add('pl-sel');
+    panels[k].hidden = false;
+    slide.classList.add('pl-open');
+  }
+  function run() {
+    close(); stopAnim();
+    if (reduce) return;
+    steps.forEach((st, k) => timers.push(setTimeout(() => {
+      steps.forEach(x => x.classList.remove('pl-on'));
+      st.classList.add('pl-on');
+      if (k === steps.length - 1) timers.push(setTimeout(() => st.classList.remove('pl-on'), 1600));
+    }, k * 1000)));
+  }
+  new MutationObserver(() => { if (slide.classList.contains('active')) run(); else { close(); stopAnim(); } })
+    .observe(slide, { attributes: true, attributeFilter: ['class'] });
+  steps.forEach((st, k) => st.addEventListener('click', () => open(k)));
+  slide.querySelectorAll('.pl-close').forEach(btn => btn.addEventListener('click', close));
+  slide.querySelector('.pl-replay').addEventListener('click', run);
+})();
 </script>
 
 </body>
