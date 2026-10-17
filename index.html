@@ -458,6 +458,46 @@
     .pl-mini { font-size: 13px; height: 18px; grid-template-columns: 170px 1fr 52px; }
     .pl-mini .pl-why-axis, .pl-mini .pl-bar { height: 10px; }
     .pl-verdict-box { font-size: 13px; }
+    /* Full pipeline: two lanes, compact cards (input shown in the panel) */
+    section[data-title="AI pipeline"] h2 { margin-bottom: 4px; }
+    section[data-title="AI pipeline"] .pl-body { gap: 10px; padding-top: 6px; }
+    .pl-lane { font-family: var(--mono); font-size: 11px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--muted);
+      display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+    .pl-lane b { color: #111; font-weight: 600; }
+    .pl-lane .chip { margin-left: auto; }
+    .pl-step h3 { font-size: 16px; }
+    .pl-loop .pl-step { padding: 7px 8px; }
+    .pl-loop .pl-step h3 { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pl-conn { align-self: center; font-family: var(--mono); font-size: 11px; color: #111; white-space: nowrap; }
+    .pl-step.pl-dark { background: #0b0b0b; border-color: #0b0b0b; }
+    .pl-step.pl-dark h3, .pl-step.pl-dark .pl-io.pl-out { color: #fff; }
+    .pl-step.pl-dark .pl-num { color: #aaa; }
+    .pl-step.pl-dark .pl-io.pl-out { border-top-color: #333; }
+    .pl-step.pl-alt { border-style: dashed; }
+    .pl-step.pl-dark.pl-sel { background: var(--yellow); border-color: #111; }
+    .pl-step.pl-dark.pl-sel h3, .pl-step.pl-dark.pl-sel .pl-io.pl-out, .pl-step.pl-dark.pl-sel .pl-num { color: #111; }
+    .pl-panel { height: 228px; }
+    .pl-cols { height: 180px; }
+    @media print { .pl-step.pl-dark.pl-sel { background: #0b0b0b; } }
+    /* tighter fit */
+    .pl-why { padding: 10px 16px; }
+    .pl-why-row { height: 23px; }
+    .pl-sum { margin-top: 4px; }
+    .pl-loop .pl-io.pl-out { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pl-panel { height: 220px; padding: 8px 12px 10px; }
+    .pl-ph { margin-bottom: 6px; }
+    .pl-cols { height: 176px; }
+    .pl-col { padding: 6px 9px; }
+    .pl-ct { margin-bottom: 4px; }
+    .pl-kv td { padding: 1px 0; line-height: 1.25; }
+    .pl-code { line-height: 1.3; margin-bottom: 4px; }
+    .pl-path li { padding: 1px 6px; }
+    .pl-big { font-size: 22px; margin-bottom: 4px; }
+    .pl-verdict-box { padding: 7px 10px; margin-bottom: 6px; }
+    .pl-verdict-box b { font-size: 20px; }
+    .pl-mini { height: 15px; }
+    section[data-title="AI pipeline"] [data-panel="5"] .pl-code { margin-bottom: 2px; }
+    .pl-drop { margin-top: 3px; }
   </style>
 </head>
 <body>
@@ -755,52 +795,17 @@
 <!-- ════════════════════════════════════════════════════════════════════════ -->
 <section class="slide" data-phase="4" data-title="AI pipeline">
   <div class="kicker">Build · Pipeline</div>
-  <h2>From payment to verdict<br><span class="hl">in six steps</span></h2>
+  <h2>One payment through <span class="hl">the whole pipeline</span></h2>
 
   <div class="body pl-body">
-    <div class="pl-flow">
-      <div class="pl-step" data-step="0">
-        <div class="pl-num">01</div>
-        <h3>Payment arrives</h3>
-        <div class="pl-io"><span>IN</span>card payment, 14 fields</div>
-        <div class="pl-io pl-out"><span>OUT</span>Best Buy · $2,334.03 · 23:29 · online · Seattle, WA</div>
-      </div>
-      <div class="pl-arrow">&rarr;</div>
-      <div class="pl-step" data-step="1">
-        <div class="pl-num">02</div>
-        <h3>Check the request</h3>
-        <div class="pl-io"><span>IN</span>14 fields</div>
-        <div class="pl-io pl-out"><span>OUT</span>10 / 10 required fields present ✓</div>
-      </div>
-      <div class="pl-arrow">&rarr;</div>
-      <div class="pl-step" data-step="2">
-        <div class="pl-num">03</div>
-        <h3>Feature engineering</h3>
-        <div class="pl-io"><span>IN</span>time, date of birth, home + shop location, amount</div>
-        <div class="pl-io pl-out"><span>OUT</span>hour <b>23</b> · age <b>78</b> · distance <b>1,757 km</b> · log-amount <b>7.76</b></div>
-      </div>
-      <div class="pl-arrow">&rarr;</div>
-      <div class="pl-step" data-step="3">
-        <div class="pl-num">04</div>
-        <h3>Encode categories</h3>
-        <div class="pl-io"><span>IN</span>category <code>shopping_net</code>, state <code>WA</code></div>
-        <div class="pl-io pl-out"><span>OUT</span>27 yes/no columns, 2 of them = 1 → <b>39 inputs</b></div>
-      </div>
-      <div class="pl-arrow">&rarr;</div>
-      <div class="pl-step pl-model" data-step="4">
-        <div class="pl-num">05</div>
-        <h3>LightGBM model</h3>
-        <div class="pl-io"><span>IN</span>39 numbers</div>
-        <div class="pl-io pl-out"><span>OUT</span>300 trees add up a score <b>+6.50</b> → sigmoid → <b>99.85 %</b></div>
-      </div>
-      <div class="pl-arrow">&rarr;</div>
-      <div class="pl-step pl-decision" data-step="5">
-        <div class="pl-num">06</div>
-        <div class="pl-diamond"><div><b>Decision</b><span>p &ge; 0.5 ?</span></div></div>
-        <div class="pl-io pl-out"><span>OUT</span><b>Block &rarr; analyst review</b></div>
-      </div>
+    <div class="pl-lane-wrap">
+      <div class="pl-lane"><b>Real-time decision</b> · 01–06 · every payment, in milliseconds</div>
+      <div class="pl-flow"><div class="pl-step" data-step="0"><div class="pl-num">01</div><h3>Payment arrives</h3><div class="pl-io pl-out">Best Buy · <b>$2,334.03</b> · 23:29 · Seattle, WA</div></div><div class="pl-arrow">&rarr;</div><div class="pl-step" data-step="1"><div class="pl-num">02</div><h3>Check the request</h3><div class="pl-io pl-out"><b>10 / 10</b> required fields ✓</div></div><div class="pl-arrow">&rarr;</div><div class="pl-step" data-step="2"><div class="pl-num">03</div><h3>Feature engineering</h3><div class="pl-io pl-out">hour <b>23</b> · age <b>78</b> · <b>1,757 km</b> · log-amt <b>7.76</b></div></div><div class="pl-arrow">&rarr;</div><div class="pl-step" data-step="3"><div class="pl-num">04</div><h3>Encode categories</h3><div class="pl-io pl-out">27 yes/no columns → <b>39 inputs</b></div></div><div class="pl-arrow">&rarr;</div><div class="pl-step pl-model" data-step="4"><div class="pl-num">05</div><h3>LightGBM model</h3><div class="pl-io pl-out">300 trees: score <b>+6.50</b> → <b>99.85 %</b></div></div><div class="pl-arrow">&rarr;</div><div class="pl-step pl-dark" data-step="5"><div class="pl-num">06</div><h3>&#9670; Decision</h3><div class="pl-io pl-out">p &ge; 0.5 → <b>Block → analyst review</b></div></div></div>
     </div>
-
+    <div class="pl-lane-wrap">
+      <div class="pl-lane"><b>Feedback &amp; nightly retraining</b> · 07–14 · after the verdict <span class="chip sim">Simulated in demo</span></div>
+      <div class="pl-flow pl-loop"><div class="pl-step" data-step="6"><div class="pl-num">07</div><h3>Analyst review</h3><div class="pl-io pl-out">label: <b>fraud</b> ✓</div></div><div class="pl-conn">+</div><div class="pl-step" data-step="7"><div class="pl-num">08</div><h3>Complaint</h3><div class="pl-io pl-out">missed → <b>label</b></div></div><div class="pl-arrow">&rarr;</div><div class="pl-step" data-step="8"><div class="pl-num">09</div><h3>Feedback data</h3><div class="pl-io pl-out"><b>+1</b> training row</div></div><div class="pl-arrow">&rarr;</div><div class="pl-step" data-step="9"><div class="pl-num">10</div><h3>Nightly retrain</h3><div class="pl-io pl-out">02:00 → <b>v1.1</b></div></div><div class="pl-arrow">&rarr;</div><div class="pl-step pl-dark" data-step="10"><div class="pl-num">11</div><h3>&#9670; Benchmark?</h3><div class="pl-io pl-out">yes 12 · no 14</div></div><div class="pl-conn">yes&rarr;</div><div class="pl-step" data-step="11"><div class="pl-num">12</div><h3>Data scientist</h3><div class="pl-io pl-out">sign-off ✓</div></div><div class="pl-arrow">&rarr;</div><div class="pl-step" data-step="12"><div class="pl-num">13</div><h3>Publish</h3><div class="pl-io pl-out">v1.1 → <b>step 05</b></div></div><div class="pl-conn">no&rarr;</div><div class="pl-step pl-alt" data-step="13"><div class="pl-num">14</div><h3>Keep current</h3><div class="pl-io pl-out">v1.0 stays</div></div></div>
+    </div>
     <div class="pl-panels">
       <div class="pl-panel" data-panel="0" hidden>
         <div class="pl-ph"><span class="pl-badge">01</span><b>Payment arrives</b><span class="pl-desc">One card payment reaches the API as a JSON request.</span><button type="button" class="pl-close" tabindex="-1">&times; close</button></div>
@@ -853,11 +858,11 @@ one column per state    (13)
       <div class="pl-panel" data-panel="4" hidden>
         <div class="pl-ph"><span class="pl-badge">05</span><b>LightGBM model</b><span class="pl-desc">300 trees add up a raw score; the sigmoid turns it into a probability.</span><button type="button" class="pl-close" tabindex="-1">&times; close</button></div>
         <div class="pl-cols">
-          <div class="pl-col"><div class="pl-ct">Data in</div><table class="pl-kv"><tr><td>amt</td><td>2,334</td></tr><tr><td>city_pop</td><td>99</td></tr><tr><td>hour</td><td>23</td></tr><tr><td>day_of_week</td><td>5</td></tr><tr><td>month</td><td>10</td></tr><tr><td>age</td><td>78</td></tr></table><p class="pl-drop">+ 4 coordinates + 27 yes/no columns = 39 values</p></div>
+          <div class="pl-col"><div class="pl-ct">Data in</div><table class="pl-kv"><tr><td>amt</td><td>2,334</td></tr><tr><td>city_pop</td><td>99</td></tr><tr><td>hour</td><td>23</td></tr><tr><td>age</td><td>78</td></tr></table><p class="pl-drop">+ 33 more inputs = 39 values</p></div>
           <div class="pl-carr">&rarr;</div>
-          <div class="pl-col"><div class="pl-ct">Process</div><div class="pl-sub">Tree #1 of 300: the path this payment took</div><ol class="pl-path"><li>Is log_amt ≤ 5.434? <span>value 7.756</span> <b>No</b></li><li>Is category_travel ≤ 0? <span>value 0</span> <b>Yes</b></li><li>Is log_amt ≤ 5.59? <span>value 7.756</span> <b>No</b></li></ol><div class="pl-leaf">leaf value +4.03</div><div class="pl-sub">Sum of all trees = raw score</div><svg class="pl-svg" viewBox="0 0 230 70"><line x1="8" y1="62.0" x2="222" y2="62.0" stroke="#bbb" stroke-dasharray="3 3"/><polyline points="8.7,30.9 11.6,30.3 15.1,29.1 25.8,25.7 43.7,21.2 79.3,15.4 115.0,13.0 150.7,12.3 186.3,13.4 222.0,11.9" fill="none" stroke="#7b5cd6" stroke-width="2"/><circle cx="222.0" cy="11.9" r="3.5" fill="#7b5cd6"/><text x="220" y="5.9" text-anchor="end" font-size="9" font-family="monospace">final +6.50</text><text x="10" y="59.0" font-size="8" font-family="monospace" fill="#888">score 0 = 50 %</text></svg></div>
+          <div class="pl-col"><div class="pl-ct">Process</div><div class="pl-sub">Tree #1 of 300: the path this payment took</div><ol class="pl-path"><li>Is log_amt ≤ 5.434? <span>value 7.756</span> <b>No</b></li><li>Is category_travel ≤ 0? <span>value 0</span> <b>Yes</b></li><li>Is log_amt ≤ 5.59? <span>value 7.756</span> <b>No</b></li></ol><div class="pl-leaf">leaf value +4.03</div></div>
           <div class="pl-carr">&rarr;</div>
-          <div class="pl-col"><div class="pl-ct">Data out</div><div class="pl-sub">Raw score (log-odds)</div><div class="pl-big">+6.4959</div><pre class="pl-code">p = 1 / (1 + e^(-score))
+          <div class="pl-col"><div class="pl-ct">Data out</div><div class="pl-sub">Sum of 300 trees = raw score</div><div class="pl-big">+6.4959</div><pre class="pl-code">p = 1 / (1 + e^(-score))
   = 0.998493</pre><div class="pl-big pl-green">99.85 %</div></div>
         </div>
       </div>
@@ -867,10 +872,115 @@ one column per state    (13)
           <div class="pl-col"><div class="pl-ct">Data in</div><table class="pl-kv"><tr><td>probability</td><td>99.85 %</td></tr><tr><td>threshold</td><td>0.50</td></tr></table></div>
           <div class="pl-carr">&rarr;</div>
           <div class="pl-col"><div class="pl-ct">Process</div><pre class="pl-code">if p >= 0.5:  verdict = "FRAUD"
-else:         verdict = "Legitimate"</pre><div class="pl-sub">Why? Top 5 of 39 contributions</div><div class="pl-mini"><span>Amount (log)</span><span class="pl-why-axis"><span class="pl-half pl-left"></span><span class="pl-half pl-right"><i class="pl-bar pos" style="width:100.0%"></i></span></span><b class="pos">+10.44</b></div><div class="pl-mini"><span>Hour (23:00)</span><span class="pl-why-axis"><span class="pl-half pl-left"></span><span class="pl-half pl-right"><i class="pl-bar pos" style="width:30.5%"></i></span></span><b class="pos">+3.18</b></div><div class="pl-mini"><span>Age (78)</span><span class="pl-why-axis"><span class="pl-half pl-left"></span><span class="pl-half pl-right"><i class="pl-bar pos" style="width:18.9%"></i></span></span><b class="pos">+1.97</b></div><div class="pl-mini"><span>Distance (1,757 km)</span><span class="pl-why-axis"><span class="pl-half pl-left"><i class="pl-bar neg" style="width:7.1%"></i></span><span class="pl-half pl-right"></span></span><b class="neg">&minus;0.74</b></div><div class="pl-mini"><span>Category (online)</span><span class="pl-why-axis"><span class="pl-half pl-left"></span><span class="pl-half pl-right"><i class="pl-bar pos" style="width:3.6%"></i></span></span><b class="pos">+0.37</b></div></div>
+else:         verdict = "Legitimate"</pre><div class="pl-sub">Why: top 5 of 39</div><div class="pl-mini"><span>Amount (log)</span><span class="pl-why-axis"><span class="pl-half pl-left"></span><span class="pl-half pl-right"><i class="pl-bar pos" style="width:100.0%"></i></span></span><b class="pos">+10.44</b></div><div class="pl-mini"><span>Hour (23:00)</span><span class="pl-why-axis"><span class="pl-half pl-left"></span><span class="pl-half pl-right"><i class="pl-bar pos" style="width:30.5%"></i></span></span><b class="pos">+3.18</b></div><div class="pl-mini"><span>Age (78)</span><span class="pl-why-axis"><span class="pl-half pl-left"></span><span class="pl-half pl-right"><i class="pl-bar pos" style="width:18.9%"></i></span></span><b class="pos">+1.97</b></div><div class="pl-mini"><span>Distance (1,757 km)</span><span class="pl-why-axis"><span class="pl-half pl-left"><i class="pl-bar neg" style="width:7.1%"></i></span><span class="pl-half pl-right"></span></span><b class="neg">&minus;0.74</b></div><div class="pl-mini"><span>Category (online)</span><span class="pl-why-axis"><span class="pl-half pl-left"></span><span class="pl-half pl-right"><i class="pl-bar pos" style="width:3.6%"></i></span></span><b class="pos">+0.37</b></div></div>
           <div class="pl-carr">&rarr;</div>
           <div class="pl-col"><div class="pl-ct">Data out</div><div class="pl-verdict-box"><span>Verdict</span><b>Fraud</b>Block &rarr; analyst review</div><pre class="pl-code">{ "verdict": "FRAUD",
   "fraud_probability": 0.998493 }</pre></div>
+        </div>
+      </div>
+    <div class="pl-panel" data-panel="6" hidden>
+        <div class="pl-ph"><span class="pl-badge">07</span><b>Manual review</b><span class="pl-desc">An analyst checks every blocked payment and records the true answer.</span><button type="button" class="pl-close" tabindex="-1">&times; close</button></div>
+        <div class="pl-cols">
+          <div class="pl-col"><div class="pl-ct">Data in</div><table class="pl-kv"><tr><td>payment</td><td>Best Buy · $2,334.03</td></tr><tr><td>time</td><td>23:29</td></tr><tr><td>model</td><td>99.85 % fraud</td></tr><tr><td>top reasons</td><td>amount, hour, age</td></tr></table></div>
+          <div class="pl-carr">&rarr;</div>
+          <div class="pl-col"><div class="pl-ct">Process</div><pre class="pl-code">open case in review queue
+contact cardholder
+analyst decides:
+  fraud  -> keep blocked
+  legit  -> release payment</pre></div>
+          <div class="pl-carr">&rarr;</div>
+          <div class="pl-col"><div class="pl-ct">Data out</div><div class="pl-verdict-box"><span>Analyst label</span><b>Fraud</b>card stays blocked</div><table class="pl-kv"><tr><td>is_fraud</td><td>1</td></tr><tr><td>sent to</td><td>step 09</td></tr></table></div>
+        </div>
+      </div>
+      <div class="pl-panel" data-panel="7" hidden>
+        <div class="pl-ph"><span class="pl-badge">08</span><b>Customer complaint</b><span class="pl-desc">Catches the frauds the model missed: approved payments the customer disputes.</span><button type="button" class="pl-close" tabindex="-1">&times; close</button></div>
+        <div class="pl-cols">
+          <div class="pl-col"><div class="pl-ct">Data in</div><table class="pl-kv"><tr><td>payment</td><td>approved, p &lt; 0.5</td></tr><tr><td>source</td><td>customer dispute</td></tr><tr><td>this payment</td><td>not used</td></tr></table></div>
+          <div class="pl-carr">&rarr;</div>
+          <div class="pl-col"><div class="pl-ct">Process</div><pre class="pl-code">customer: "I did not make
+           this payment"
+dispute confirmed
+  -> label = fraud</pre></div>
+          <div class="pl-carr">&rarr;</div>
+          <div class="pl-col"><div class="pl-ct">Data out</div><table class="pl-kv"><tr><td>is_fraud</td><td>1</td></tr><tr><td>type</td><td>missed fraud</td></tr><tr><td>sent to</td><td>step 09</td></tr></table><p class="pl-drop">This payment was blocked at step 06, so it takes the analyst path (07).</p></div>
+        </div>
+      </div>
+      <div class="pl-panel" data-panel="8" hidden>
+        <div class="pl-ph"><span class="pl-badge">09</span><b>Labelled feedback data</b><span class="pl-desc">Every human answer becomes a new training example.</span><button type="button" class="pl-close" tabindex="-1">&times; close</button></div>
+        <div class="pl-cols">
+          <div class="pl-col"><div class="pl-ct">Data in</div><table class="pl-kv"><tr><td>from 07</td><td>analyst labels</td></tr><tr><td>from 08</td><td>confirmed disputes</td></tr></table></div>
+          <div class="pl-carr">&rarr;</div>
+          <div class="pl-col"><div class="pl-ct">Process</div><pre class="pl-code">row = 39 model inputs
+    + is_fraud label
+append to feedback table</pre></div>
+          <div class="pl-carr">&rarr;</div>
+          <div class="pl-col"><div class="pl-ct">Data out</div><table class="pl-kv"><tr><td>amount</td><td>$2,334.03</td></tr><tr><td>hour</td><td>23</td></tr><tr><td>age</td><td>78</td></tr><tr><td>distance</td><td>1,757 km</td></tr><tr><td>is_fraud</td><td><b>1</b></td></tr></table><p class="pl-drop">+ 34 more inputs · used in tonight's retraining</p></div>
+        </div>
+      </div>
+      <div class="pl-panel" data-panel="9" hidden>
+        <div class="pl-ph"><span class="pl-badge">10</span><b>OpenClaw nightly retrain</b><span class="pl-desc">Every night at 02:00 an AI agent trains a candidate model.</span><button type="button" class="pl-close" tabindex="-1">&times; close</button></div>
+        <div class="pl-cols">
+          <div class="pl-col"><div class="pl-ct">Data in</div><table class="pl-kv"><tr><td>training set</td><td>271,685 payments</td></tr><tr><td>+ new labels</td><td>from step 09</td></tr><tr><td>schedule</td><td>02:00 nightly</td></tr></table></div>
+          <div class="pl-carr">&rarr;</div>
+          <div class="pl-col"><div class="pl-ct">Process</div><pre class="pl-code">lgb.train(
+  n_trees       = 300,
+  learning_rate = 0.05,
+  max_depth     = 7,
+  num_leaves    = 31)</pre></div>
+          <div class="pl-carr">&rarr;</div>
+          <div class="pl-col"><div class="pl-ct">Data out</div><div class="pl-sub">Candidate</div><div class="pl-big">LightGBM v1.1</div><table class="pl-kv"><tr><td>inputs</td><td>same 39 columns</td></tr><tr><td>sent to</td><td>step 11</td></tr></table></div>
+        </div>
+      </div>
+      <div class="pl-panel" data-panel="10" hidden>
+        <div class="pl-ph"><span class="pl-badge">11</span><b>Better than benchmark?</b><span class="pl-desc">The candidate must beat the production model on the same test payments.</span><button type="button" class="pl-close" tabindex="-1">&times; close</button></div>
+        <div class="pl-cols">
+          <div class="pl-col"><div class="pl-ct">Data in</div><table class="pl-kv"><tr><td>candidate</td><td>v1.1</td></tr><tr><td>production</td><td>v1.0</td></tr><tr><td>test set</td><td>67,922 payments</td></tr><tr><td>of them fraud</td><td>356</td></tr></table></div>
+          <div class="pl-carr">&rarr;</div>
+          <div class="pl-col"><div class="pl-ct">Process</div><pre class="pl-code">score both on the test set
+if v1.1 beats v1.0:
+    go to 12  (review)
+else:
+    go to 14  (keep v1.0)</pre></div>
+          <div class="pl-carr">&rarr;</div>
+          <div class="pl-col"><div class="pl-ct">Data out</div><div class="pl-sub">Benchmark: LightGBM v1.0</div><table class="pl-kv"><tr><td>recall</td><td>84.0 %</td></tr><tr><td>precision</td><td>92.6 %</td></tr><tr><td>F1</td><td>0.881</td></tr><tr><td>AUC</td><td>0.998</td></tr></table></div>
+        </div>
+      </div>
+      <div class="pl-panel" data-panel="11" hidden>
+        <div class="pl-ph"><span class="pl-badge">12</span><b>Data scientist review</b><span class="pl-desc">A person signs off before anything goes live.</span><button type="button" class="pl-close" tabindex="-1">&times; close</button></div>
+        <div class="pl-cols">
+          <div class="pl-col"><div class="pl-ct">Data in</div><table class="pl-kv"><tr><td>candidate</td><td>v1.1, passed 11</td></tr><tr><td>report</td><td>v1.1 vs v1.0</td></tr></table></div>
+          <div class="pl-carr">&rarr;</div>
+          <div class="pl-col"><div class="pl-ct">Process</div><pre class="pl-code">check metrics
+check false alarms
+check the "why" reasons
+  make sense
+approve or reject</pre></div>
+          <div class="pl-carr">&rarr;</div>
+          <div class="pl-col"><div class="pl-ct">Data out</div><div class="pl-verdict-box"><span>Decision</span><b>Approved</b>signed off by data scientist</div><table class="pl-kv"><tr><td>sent to</td><td>step 13</td></tr></table></div>
+        </div>
+      </div>
+      <div class="pl-panel" data-panel="12" hidden>
+        <div class="pl-ph"><span class="pl-badge">13</span><b>Publish</b><span class="pl-desc">The approved model replaces the production model at step 05.</span><button type="button" class="pl-close" tabindex="-1">&times; close</button></div>
+        <div class="pl-cols">
+          <div class="pl-col"><div class="pl-ct">Data in</div><table class="pl-kv"><tr><td>model</td><td>v1.1, signed off</td></tr><tr><td>inputs</td><td>39 columns, same order</td></tr></table></div>
+          <div class="pl-carr">&rarr;</div>
+          <div class="pl-col"><div class="pl-ct">Process</div><pre class="pl-code">save model file
++ list of 39 input columns
+replace model at step 05</pre></div>
+          <div class="pl-carr">&rarr;</div>
+          <div class="pl-col"><div class="pl-ct">Data out</div><div class="pl-sub">Live at step 05</div><div class="pl-big">LightGBM v1.1</div><table class="pl-kv"><tr><td>previous</td><td>v1.0 kept for rollback</td></tr></table></div>
+        </div>
+      </div>
+      <div class="pl-panel" data-panel="13" hidden>
+        <div class="pl-ph"><span class="pl-badge">14</span><b>Keep current model</b><span class="pl-desc">If the candidate is not better, or is not signed off, nothing changes.</span><button type="button" class="pl-close" tabindex="-1">&times; close</button></div>
+        <div class="pl-cols">
+          <div class="pl-col"><div class="pl-ct">Data in</div><table class="pl-kv"><tr><td>candidate</td><td>v1.1, failed 11 or 12</td></tr></table></div>
+          <div class="pl-carr">&rarr;</div>
+          <div class="pl-col"><div class="pl-ct">Process</div><pre class="pl-code">discard candidate
+keep v1.0 at step 05
+try again tomorrow 02:00</pre></div>
+          <div class="pl-carr">&rarr;</div>
+          <div class="pl-col"><div class="pl-ct">Data out</div><div class="pl-sub">Live at step 05</div><div class="pl-big">LightGBM v1.0</div><table class="pl-kv"><tr><td>change</td><td>none</td></tr></table></div>
         </div>
       </div>
     </div>
@@ -898,7 +1008,7 @@ else:         verdict = "Legitimate"</pre><div class="pl-sub">Why? Top 5 of 39 c
         <span class="tag">Verdict · recorded test payment</span>
         <div class="model">FRAUD · 99.85 %</div>
         <div class="stats">Block &rarr; analyst review<br>threshold 0.5 · score +6.50 · 300 trees</div>
-        <p class="small">Synthetic test payment, recorded from the demo API. Click any step above to open its data.</p>
+        <p class="small">Synthetic test payment, recorded from the demo API. Click any of the 14 steps to open its data.</p>
         <button type="button" class="pl-replay" tabindex="-1">&#8635; Replay</button>
       </div>
     </div>
@@ -910,6 +1020,7 @@ else:         verdict = "Legitimate"</pre><div class="pl-sub">Why? Top 5 of 39 c
       <li>The API first checks the request, then turns raw fields into the signals the model learned: hour 23, age 78, distance, log-amount. Categories become 27 yes/no columns, 39 numbers in total.</li>
       <li>LightGBM's 300 small trees add up a score; the sigmoid turns it into a probability: 99.85% fraud, so the payment is blocked and goes to an analyst.</li>
       <li>Why? Mostly the amount, the late hour and the age. Distance actually pushed towards legitimate, the same lesson as on the data slide.</li>
+      <li>(~30 s) The bottom row is what happens after the verdict: the analyst confirms the fraud, and that answer becomes a new labelled example. Every night at 02:00 the OpenClaw agent retrains a candidate; it only replaces the model if it beats the benchmark and a data scientist signs off. In the demo this loop is simulated.</li>
       <li>"Let's see it in action."</li>
     </ul>
     </div>
@@ -1274,7 +1385,7 @@ if (window.Chart) {
       steps.forEach(x => x.classList.remove('pl-on'));
       st.classList.add('pl-on');
       if (k === steps.length - 1) timers.push(setTimeout(() => st.classList.remove('pl-on'), 1600));
-    }, k * 1000)));
+    }, k * 430)));
   }
   // React only when the slide is entered or left; close()/open() change the class too, so ignore those
   let wasActive = slide.classList.contains('active');
