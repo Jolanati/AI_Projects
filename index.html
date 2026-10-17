@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Catching Fraud — Pitch | RSU AI Project Management</title>
+  <title>Catching Fraud at NordPay — Pitch | RSU AI Project Management</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <style>
     /* ── Light academic palette ────────────────────────────────────────── */
@@ -53,7 +53,7 @@
       transform: translate(-50%, -50%) scale(var(--scale, 1));
       background: var(--paper);
       box-shadow: 0 10px 40px rgba(60, 40, 30, 0.18);
-      border-radius: 6px;
+      border-radius: 0;
       padding: 84px 72px 56px;
       display: flex; flex-direction: column;
       opacity: 0; pointer-events: none;
@@ -140,9 +140,9 @@
     }
     .card.tint  { background: var(--card-tint); }
     .card.burg  { border-color: var(--burgundy); box-shadow: inset 4px 0 0 var(--burgundy); }
-    .card.fraud { background: var(--fraud-bg); border-color: #e8c4c9; }
+    .card.fraud { background: var(--fraud-bg); border-color: #e9b5b5; }
     .card.good  { background: var(--good-bg);  border-color: #c4d9ec; }
-    .card.amber { background: var(--amber-bg); border-color: #efdcb8; }
+    .card.amber { background: var(--amber-bg); border-color: #ead48a; }
 
     .tag {
       display: inline-block; font-family: var(--mono); font-size: 10.5px;
@@ -196,7 +196,7 @@
     .controls:hover { opacity: 1; }
     .controls button {
       font: inherit; color: var(--ink-soft); background: var(--paper);
-      border: 1px solid var(--line-strong); border-radius: 5px;
+      border: 1px solid var(--line-strong); border-radius: 0;
       padding: 4px 9px; cursor: pointer;
     }
     .controls button:hover { border-color: var(--burgundy); color: var(--burgundy); }
@@ -227,6 +227,107 @@
       }
       .controls, .notes-panel { display: none !important; }
     }
+    /* ════════════════════════════════════════════════════════════════════
+       Fraud Monitor style: matches Ģirts' demo app
+       black = ink & structure · yellow = highlight · red = fraud
+       teal = approved · chart: red = frauds caught, yellow = false alarms
+       ════════════════════════════════════════════════════════════════════ */
+    :root {
+      --page:        #e4e4e1;
+      --paper:       #f6f6f3;
+      --card:        #ffffff;
+      --card-tint:   #efefec;
+      --line:        #dcdcd7;
+      --line-strong: #b9b9b3;
+      --ink:         #111111;
+      --ink-soft:    #3d3d3a;
+      --muted:       #6b6b66;
+      --burgundy:    #111111;
+      --burgundy-dk: #000000;
+      --burgundy-bg: #fff3b0;
+      --yellow:      #ffe14d;
+      --teal:        #0f5c4f;
+      --fraud:       #c3302d;
+      --fraud-bg:    #fdeeee;
+      --good:        #0f5c4f;
+      --good-bg:     #e3f0ec;
+      --amber:       #8a6a00;
+      --amber-bg:    #fff7d6;
+      --serif: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --sans:  'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --mono:  'JetBrains Mono', Consolas, 'Cascadia Mono', 'Courier New', monospace;
+    }
+    .slide { border-radius: 0; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12); }
+    h1 { font-weight: 600; letter-spacing: -1.5px; }
+    h2 { font-weight: 600; letter-spacing: -0.8px; }
+    h3 { font-weight: 600; font-size: 18px; letter-spacing: -0.2px; }
+    .num { font-weight: 600; letter-spacing: -1px; }
+    .hl { background: linear-gradient(transparent 6%, var(--yellow) 6%, var(--yellow) 94%, transparent 94%);
+          padding: 0 8px; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+    .kicker { color: var(--muted); letter-spacing: 1.8px; }
+    .card { border-radius: 0; border: 1px solid #cfcfca; }
+    .card.burg { border: 2px solid #111; box-shadow: none; }
+    .card.fraud { background: var(--fraud-bg); border-color: #e9b5b5; }
+    .card.amber { background: var(--amber-bg); border-color: #ead48a; }
+    .tag { border-radius: 0; letter-spacing: 1.2px; }
+    .callout { border-left: 4px solid #111; font-weight: 500; }
+    ul.points li::before { border-radius: 0; background: #111; }
+    table.data tr.hl td { background: #fff3b0; }
+    .placeholder { border-radius: 0; border: 2px dashed #9a9a94; }
+
+    /* Top bar: the app's black header */
+    .tracker {
+      top: 0; left: 0; right: 0; height: 46px; padding: 0 72px;
+      background: #0b0b0b; gap: 26px;
+      font-family: var(--mono); font-size: 11px; letter-spacing: 1.4px;
+      text-transform: uppercase; color: #8f8f8a;
+    }
+    .tracker .brand { color: #fff; font-weight: 700; display: flex; align-items: center; gap: 10px; margin-right: auto; }
+    .tracker .brand i { width: 12px; height: 12px; background: var(--yellow); display: inline-block; }
+    .tracker .step { height: 46px; display: flex; align-items: center; border-bottom: 3px solid transparent; color: #8f8f8a; font-weight: 400; }
+    .tracker .step.done { color: #c8c8c3; }
+    .tracker .step.current { color: #fff; font-weight: 700; border-bottom-color: var(--yellow); }
+    .tracker .dot, .tracker .bar { display: none; }
+
+    /* Pipeline lanes (backup map) */
+    .lane-grey { background: #ececea; padding: 10px 12px; margin: 0 -12px; }
+    .lane-dark { background: #0b0b0b; padding: 10px 12px; margin: 0 -12px; }
+    .lane-dark h3 { color: #fff; }
+    .lane-dark > div > .tiny { color: #bdbdb8; }
+    .lane-dark > div > .tag { color: var(--yellow); }
+    /* ── Pass 2: closer to the app ─────────────────────────────────────── */
+    h2 { font-size: 44px; font-weight: 500; line-height: 1.1; letter-spacing: -1.2px; margin-bottom: 12px; }
+    h1 { font-weight: 500; letter-spacing: -2px; }
+    .hl { padding: 0 10px; margin-left: -10px; }
+    .tag { border: none; padding: 0; color: var(--muted); font-size: 10.5px; letter-spacing: 1.6px; margin-bottom: 8px; }
+    .tag.t-fraud { color: var(--fraud); }
+    .tag.t-amber { color: var(--amber); }
+    .tag.t-burg { color: #111; }
+    .sec { font-family: var(--mono); font-size: 11px; letter-spacing: 1.6px; text-transform: uppercase;
+           color: #111; padding-bottom: 7px; border-bottom: 2px solid #111; margin-bottom: 10px;
+           display: flex; justify-content: space-between; align-items: center; }
+    .chip { font-family: var(--mono); font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase;
+            padding: 3px 8px; display: inline-block; }
+    .chip.sim { background: #5b3fa0; color: #fff; }
+    .chip.live { background: #111; color: var(--yellow); }
+    .btn { font-family: var(--mono); font-size: 13px; letter-spacing: 1.6px; text-transform: uppercase;
+           padding: 14px 24px; border: 1.5px solid #111; color: #111; background: #fff; display: inline-block; }
+    .btn.primary { background: var(--yellow); border-color: var(--yellow); font-weight: 700; }
+    .bench { background: #0b0b0b; color: #fff; border: none; }
+    .bench .tag { color: #bdbdb8; }
+    .bench .model { font-size: 34px; font-weight: 500; color: var(--yellow); letter-spacing: -0.8px; line-height: 1.1; }
+    .bench .stats { font-family: var(--mono); font-size: 12.5px; color: #e6e6e0; line-height: 1.7; }
+    .bench .small { color: #bdbdb8; }
+    .tracker .brand { margin-right: 28px; }
+    .tracker .status { margin-left: auto; color: #c8c8c3; display: flex; align-items: center; gap: 8px; }
+    .body { padding-top: 18px; }
+    table.data td { padding: 6px 10px; }
+    .tracker .status i { width: 8px; height: 8px; border-radius: 50%; background: var(--yellow); display: inline-block; }
+    /* ── Pass 3: fewer colours. Neutrals + yellow title marker;
+          data only in dark green (frauds caught) and purple (false alarms) ── */
+    :root { --fraud: #111111; --good: #0a7d5a; --amber: #6a4cc4; --teal: #0a7d5a; }
+    .card.fraud, .card.amber { background: var(--card); border-color: #cfcfca; }
+    .chip.sim { background: #fff; color: #111; border: 1px solid #111; }
   </style>
 </head>
 <body>
@@ -245,10 +346,10 @@
     </div>
     <div class="callout" style="max-width: 820px;">
       A model that always says “not fraud” is right 99.5% of the time, because fraud is that rare.
-      <span class="small">Our project: an AI that actually catches it.</span>
+      <span class="small">Our project: an AI that actually catches it, running every day at NordPay.</span>
     </div>
     <div style="margin-top: 10px; padding-top: 18px; border-top: 1px solid var(--line);">
-      <h1 style="font-size: 44px; margin-bottom: 10px;">Catching Fraud</h1>
+      <h1 style="font-size: 44px; margin-bottom: 10px;">Catching Fraud <span class="hl">at NordPay</span></h1>
       <div style="font-size: 15px; color: var(--ink-soft); display: flex; flex-wrap: wrap; gap: 6px 26px;">
         <span>Girts Ziemanis</span><span>Ugis Rutins</span><span>Maris Zelcs</span>
         <span>Ruslans Muhitovs</span><span>Evija Sturmane</span><span>Jolanta Stutane</span>
@@ -259,14 +360,14 @@
     <div class="say">
     <ul>
       <li>(~20 s) "Imagine a fraud detector that is 99.5% accurate. Sounds great? It catches zero fraud."</li>
-      <li>Only 0.52% of card payments are fraud, so a model that always says "not fraud" is right 99.5% of the time and useless.</li>
-      <li>"We are team Catching Fraud, and in the next minutes we show you an AI that does catch it: where its data comes from, why it needs AI, and how we'd launch it."</li>
+      <li>Only about 0.5% of card payments are fraud, so a model that always says "not fraud" is right 99.5% of the time, and useless.</li>
+      <li>"We are the AI team at NordPay, a Baltic card issuer. In the next minutes we show you how our AI catches fraud every day: our data, why it needs AI, how we built it, and how it runs."</li>
     </ul>
     </div>
     <div class="more">
-      <p><strong>Why accuracy misleads here.</strong> Only 1,782 of 339,607 payments in our data are fraud (0.52%). A model that answers “not fraud” every time is therefore correct 99.48% of the time, yet it never stops a single fraudster. Accuracy counts every correct answer equally, so when one class is tiny the big class dominates the score.</p>
-      <p><strong>What we measure instead.</strong> From the start we defined success as <em>Recall</em> (the share of real fraud we catch), with false alarms as a guardrail (we must not block every customer) and money as the business measure. Every number later in the pitch is one of these three.</p>
-      <p><strong>The storyline.</strong> Problem &rarr; why AI &rarr; where the data comes from &rarr; what fraud looks like &rarr; how we built and chose the model &rarr; pipeline and demo &rarr; how we would launch it. The tracker at the top of each slide shows where we are.</p>
+      <p><strong>The setting.</strong> NordPay is a fictional Baltic card issuer. The process we show (daily data, real-time scoring, analyst reviews, nightly retraining by an AI agent) is how a modern company would run fraud detection. The model results we quote were measured on our prototype dataset, which is said once on the data slide.</p>
+      <p><strong>Why accuracy misleads here.</strong> In our prototype data only 1,782 of 339,607 payments are fraud (0.52%). A model that answers "not fraud" every time is correct 99.48% of the time, yet never stops a single fraudster. Accuracy counts every correct answer equally, so when one class is tiny the big class dominates the score.</p>
+      <p><strong>What we measure instead.</strong> Recall (the share of real fraud we catch), false alarms as a guardrail (we must not block every customer), and money as the business measure. Every number later in the pitch is one of these three.</p>
     </div>
   </aside>
 </section>
@@ -276,43 +377,42 @@
 <!-- ════════════════════════════════════════════════════════════════════════ -->
 <section class="slide" data-phase="1" data-title="The problem">
   <div class="kicker">Problem · Who pays for fraud</div>
-  <h2>Every missed fraud is money gone</h2>
-  <p class="lead">A card issuer wants to stop fraudulent payments before the customer loses money.</p>
+  <h2>Every missed fraud is<br><span class="hl">money gone</span></h2>
+  <p class="lead">NordPay wants to stop fraudulent card payments before customers lose money.</p>
 
   <div class="body">
     <div class="grid-2">
       <div class="card fraud">
         <span class="tag t-fraud">Missed fraud</span>
         <h3>Fraud &rarr; approved</h3>
-        <p class="small">The money is gone. Average fraud payment: <strong class="t-fraud">$518</strong>. The bank pays the chargeback and loses trust.</p>
+        <p class="small">The money is gone. Average fraud payment: <strong class="t-fraud">$518</strong>. NordPay handles the chargeback and loses trust.</p>
         <div class="num t-fraud" style="font-size: 30px; margin-top: 14px;">Expensive</div>
       </div>
       <div class="card amber">
         <span class="tag t-amber">False alarm</span>
         <h3>Legit &rarr; blocked</h3>
-        <p class="small">A real purchase is declined. The customer calls, the card is unblocked in minutes.</p>
+        <p class="small">A real purchase is flagged and held. An analyst reviews it and releases it.</p>
         <div class="num t-amber" style="font-size: 30px; margin-top: 14px;">Recoverable</div>
       </div>
     </div>
     <div class="grid-3">
       <div class="card"><span class="tag t-burg">Cardholder</span><h3>No friction, no loss</h3><p class="small">Pays easily and never loses money to a stolen card.</p></div>
-      <div class="card"><span class="tag t-burg">Fraud analyst</span><h3>Few, well-chosen cases</h3><p class="small">Reviews unsure payments, not thousands of alerts.</p></div>
-      <div class="card"><span class="tag t-burg">The bank</span><h3>Fewer losses</h3><p class="small">Happy customers and satisfied regulators.</p></div>
+      <div class="card"><span class="tag t-burg">Fraud analyst</span><h3>Few, well-chosen cases</h3><p class="small">Reviews flagged payments, not thousands of alerts.</p></div>
+      <div class="card"><span class="tag t-burg">NordPay</span><h3>Fewer losses</h3><p class="small">Happy customers and satisfied regulators.</p></div>
     </div>
   </div>
   <aside class="notes">
     <div class="say">
     <ul>
-      <li>(~40 s) Two possible mistakes, very different prices. A missed fraud is real money lost (average $518 in our data) plus a chargeback and lost trust. A false alarm is an annoyed customer and a phone call.</li>
-      <li>So our goal is: catch as much fraud as possible, while keeping false alarms low. "When in doubt, stop the transaction."</li>
-      <li>Three users: the cardholder, the fraud analyst who reviews cases, and the bank that pays for losses.</li>
+      <li>(~40 s) Two possible mistakes with very different prices. A missed fraud is real money lost (on average $518) plus a chargeback and lost trust. A false alarm is a genuine payment held until an analyst releases it.</li>
+      <li>So our goal: catch as much fraud as possible, while keeping false alarms low. "When in doubt, stop the payment."</li>
+      <li>Three users: the cardholder, the fraud analyst who reviews cases, and NordPay, which pays for the losses.</li>
     </ul>
     </div>
     <div class="more">
       <p><strong>Two kinds of mistakes.</strong> A <em>missed fraud</em> (false negative) means a fraudulent payment is approved. A <em>false alarm</em> (false positive) means a genuine payment is blocked. A fraud model always trades one against the other: catching more fraud usually means more false alarms.</p>
-      <p><strong>Why the prices differ.</strong> The average fraudulent payment in our data is $518 (median $356), compared with $68 for a normal payment. On top of the lost money the bank handles a chargeback and risks losing the customer's trust. A false alarm costs a phone call and some annoyance, which is recoverable, but too many of them drive customers away. That is why false alarms are a guardrail, not something we ignore.</p>
-      <p><strong>Three users.</strong> The cardholder wants to pay without friction and never lose money. The fraud analyst needs a small number of well-chosen cases to review, not thousands of alerts. The bank pays for every missed fraud and must keep customers and regulators satisfied.</p>
-      <p><strong>Course link.</strong> Lecture 6 makes the same point with a different example: “a wrong blur is cheap; a missed face is not.” This cost difference drives every later decision: the metric, the model choice, the threshold and the score bands.</p>
+      <p><strong>Why the prices differ.</strong> In our prototype data the average fraudulent payment is $518 (median $356), against $68 for a normal payment. On top of the lost money there is the chargeback process and the risk of losing the customer. A false alarm costs a moment of friction, which is recoverable, but too many of them drive customers away, so false alarms are a guardrail.</p>
+      <p><strong>Course link.</strong> Lecture 6: "a wrong blur is cheap; a missed face is not." This cost difference drives every later decision: the metric, the model choice, the threshold and the manual review step.</p>
     </div>
   </aside>
 </section>
@@ -322,25 +422,22 @@
 <!-- ════════════════════════════════════════════════════════════════════════ -->
 <section class="slide" data-phase="2" data-title="Why AI">
   <div class="kicker">Why AI · Rules vs model</div>
-  <h2>Fraud is a combination. Rules can't keep up.</h2>
+  <h2>Fraud is a combination.<br><span class="hl">Rules can't keep up.</span></h2>
   <p class="lead">Same 67,922 test payments, 356 of them fraud. Simple rules vs our AI model:</p>
 
   <div class="body">
     <div class="split" style="grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);">
       <div style="display: flex; flex-direction: column; gap: 18px;">
-        <div class="card" style="display: flex; flex-direction: column; height: 330px;">
-          <div class="row" style="justify-content: space-between; align-items: baseline;">
-            <h3>Frauds caught and false alarms</h3>
-            <span class="tiny">locked test set</span>
-          </div>
+        <div class="card" style="display: flex; flex-direction: column; height: 285px;">
+          <div class="sec">Frauds caught and false alarms <span class="chip sim">Prototype</span></div>
           <div class="chart-box"><canvas id="chartRules"></canvas></div>
         </div>
-        <div class="callout"><span class="t-fraud">84%</span> of fraud caught with only <span class="t-amber">24</span> false alarms.</div>
+        <div class="callout"><span class="t-good">84%</span> of fraud caught with only <span class="t-amber">24</span> false alarms.</div>
       </div>
       <div style="display: flex; flex-direction: column; gap: 12px;">
-        <div class="card" style="padding: 14px 20px;"><span class="tag t-burg">Combination</span><h3>Many signals at once</h3><p class="small">A rule checks one signal; the model weighs hour, amount, merchant type and age together.</p></div>
-        <div class="card" style="padding: 14px 20px;"><span class="tag t-burg">Adapts</span><h3>Retrained, not rewritten</h3><p class="small">Fraudsters learn the rules. A model learns from new fraud.</p></div>
-        <div class="card" style="padding: 14px 20px;"><span class="tag t-burg">Score</span><h3>Not just yes or no</h3><p class="small">Unsure cases go to a person instead of being blocked.</p></div>
+        <div class="card" style="padding: 14px 20px;"><span class="tag t-burg">Combination</span><h3>Many signals at once</h3><p class="small">A rule checks one signal; the model weighs hour, amount, merchant type and customer together.</p></div>
+        <div class="card" style="padding: 14px 20px;"><span class="tag t-burg">Adapts</span><h3>Retrained, not rewritten</h3><p class="small">Fraudsters learn the rules. Our model retrains every night on new fraud.</p></div>
+        <div class="card" style="padding: 14px 20px;"><span class="tag t-burg">Score</span><h3>Not just yes or no</h3><p class="small">Suspicious payments go to a person, who makes the final call.</p></div>
       </div>
     </div>
   </div>
@@ -350,14 +447,14 @@
       <li>(~45 s) Why do we need AI at all? We tested the obvious rules on exactly the same test payments as the model.</li>
       <li>"Block every payment over $500" catches 152 of 356 frauds (43%) and blocks 637 innocent customers. "Block night payments over $300" catches 185 (52%) with 287 false alarms.</li>
       <li>Our AI model catches 299 (84%) with only 24 false alarms. It combines many weak signals that a rule looks at one by one.</li>
-      <li>And fraud changes: rules must be rewritten by hand, a model is retrained. It also gives a score, so unsure cases can go to a person.</li>
+      <li>And fraud changes: rules are rewritten by hand, our model is retrained every night. It also gives a score, so suspicious payments go to an analyst.</li>
     </ul>
     </div>
     <div class="more">
-      <p><strong>How we tested the rules.</strong> We applied two simple rules to exactly the same locked test set as the model: 67,922 payments, 356 of them fraud. “Block every payment over $500” catches 152 frauds (43%) but blocks 637 genuine customers. “Block night payments (22:00–03:59) over $300” catches 185 (52%) with 287 false alarms. Our AI model catches 299 (84%) with only 24 false alarms.</p>
-      <p><strong>Why the model wins.</strong> A rule looks at one or two signals and draws a hard line. Fraud rarely shows up in one signal; it shows up in combinations, for example a mid-sized online purchase late at night by an older customer. The model weighs all 39 inputs together and learns these combinations from past payments.</p>
-      <p><strong>Why it matters over time.</strong> Fraudsters adapt to whatever gets blocked. A rule set has to be rewritten by hand; a model is retrained on newly confirmed fraud. The model also outputs a score from 0 to 1 instead of yes/no, which lets unsure cases go to a person.</p>
-      <p><strong>Honest caveat.</strong> These are simple illustrative rules, not a bank's tuned rule engine. Real rule sets are stronger, but they hit the same limit: every rule is written by a person and checks a fixed combination.</p>
+      <p><strong>How we tested the rules.</strong> Both rules were applied to the same locked test set of our prototype dataset as the model: 67,922 payments, 356 of them fraud. The night window is 22:00–03:59.</p>
+      <p><strong>Why the model wins.</strong> A rule looks at one or two signals and draws a hard line. Fraud rarely shows up in one signal; it shows up in combinations, for example a mid-sized online purchase late at night by an older customer. The model weighs all inputs together and learns these combinations from past payments.</p>
+      <p><strong>Why it matters over time.</strong> Fraudsters adapt to whatever gets blocked. A rule set has to be rewritten by hand; a model is retrained on newly confirmed fraud. The score from 0 to 1 also lets NordPay treat payments differently: low-risk payments pass smoothly, flagged ones go to an analyst for review.</p>
+      <p><strong>Honest caveat.</strong> These are simple illustrative rules, not a tuned rule engine. Real rule sets are stronger, but they hit the same limit: every rule is written by a person and checks a fixed combination.</p>
     </div>
   </aside>
 </section>
@@ -366,58 +463,55 @@
 <!--  4 · WHERE THE DATA COMES FROM                                         -->
 <!-- ════════════════════════════════════════════════════════════════════════ -->
 <section class="slide" data-phase="3" data-title="Where the data comes from">
-  <div class="kicker">Data · Source</div>
-  <h2>Where the data comes from</h2>
-  <p class="lead">A public Kaggle dataset of card payments: fast and free to start, but not a bank's own data.</p>
-
-  <div class="row" style="margin: 10px 0 0; gap: 40px;">
-    <div class="stat"><div class="num">339,607</div><div class="lbl">card payments</div></div>
-    <div class="stat"><div class="num">2019–20</div><div class="lbl">two years of history</div></div>
-    <div class="stat"><div class="num">13</div><div class="lbl">western US states</div></div>
-    <div class="stat"><div class="num t-fraud">1,782</div><div class="lbl">frauds: 0.52%, 1 in 191</div></div>
-  </div>
+  <div class="kicker">Data · Sources</div>
+  <h2>Where our data comes from,<br><span class="hl">every day</span></h2>
+  <p class="lead">Five sources feed the model. Every night the data is checked and saved as a dated version.</p>
 
   <div class="body" style="gap: 14px;">
-    <div class="card" style="padding: 14px 22px;">
-      <div class="row" style="justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
-        <h3>The problem: almost no fraud to learn from</h3>
-        <span class="tiny">bar = share of payments</span>
+    <div class="split" style="grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);">
+      <div class="card" style="padding: 8px 14px;">
+        <table class="data">
+          <thead><tr><th>Source</th><th>What it tells us</th><th class="r">Updated</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Payment system</strong></td><td class="small">amount, merchant, channel, device, location</td><td class="r"><span class="tag t-fraud" style="margin: 0;">live</span></td></tr>
+            <tr><td><strong>Customer data</strong></td><td class="small">age, home address, usual spending</td><td class="r"><span class="tag t-burg" style="margin: 0;">daily</span></td></tr>
+            <tr><td><strong>Merchant data</strong></td><td class="small">category, the merchant's fraud history</td><td class="r"><span class="tag t-burg" style="margin: 0;">daily</span></td></tr>
+            <tr><td><strong>Fraud answers</strong></td><td class="small">analyst reviews, customer complaints, chargebacks</td><td class="r"><span class="tag t-amber" style="margin: 0;">hours–60 days</span></td></tr>
+            <tr><td><strong>Card networks</strong></td><td class="small">alerts on compromised cards</td><td class="r"><span class="tag t-burg" style="margin: 0;">daily</span></td></tr>
+          </tbody>
+        </table>
       </div>
-      <div class="row" style="gap: 0; height: 28px; border-radius: 6px; overflow: hidden;">
-        <div style="flex: 99.48; background: var(--line); display: flex; align-items: center; padding-left: 14px; font-size: 13px; color: var(--ink-soft);">337,825 legitimate</div>
-        <div style="flex: 0.52; min-width: 8px; background: var(--fraud);"></div>
-      </div>
-      <div class="row" style="justify-content: space-between; align-items: baseline; margin: 14px 0 8px;">
-        <h3>The fix: we generated synthetic fraud for training</h3>
-        <span class="tiny">training data only</span>
-      </div>
-      <div class="row" style="gap: 0; height: 28px; border-radius: 6px; overflow: hidden;">
-        <div style="flex: 50; background: var(--line); display: flex; align-items: center; padding-left: 14px; font-size: 13px; color: var(--ink-soft);">270,259 legitimate</div>
-        <div style="flex: 0.53; background: var(--fraud);"></div>
-        <div style="flex: 49.47; background: repeating-linear-gradient(135deg, #e8c4c9 0 6px, #f6e6e8 6px 12px); display: flex; align-items: center; padding-left: 14px; font-size: 13px; color: var(--fraud);">+ 268,833 synthetic fraud &nbsp;<span class="tiny">(blended from 1,426 real ones)</span></div>
+      <div class="card tint" style="display: flex; flex-direction: column; gap: 10px;">
+        <span class="chip sim" style="align-self: flex-start;">Our prototype dataset</span>
+        <h3>339,607 past payments, only 1,782 fraud (0.52%)</h3>
+        <div class="row" style="gap: 0; height: 22px; border-radius: 0; overflow: hidden;">
+          <div style="flex: 99.48; background: var(--line);"></div>
+          <div style="flex: 0.52; min-width: 6px; background: var(--good);"></div>
+        </div>
+        <p class="small">Too little fraud to learn from, so for training we <strong>generated synthetic fraud</strong> (SMOTE): +268,833 examples, a 50/50 balance.</p>
+        <div class="row" style="gap: 0; height: 22px; border-radius: 0; overflow: hidden;">
+          <div style="flex: 50; background: var(--line);"></div>
+          <div style="flex: 50; background: repeating-linear-gradient(135deg, #b9ddcf 0 6px, #e6f3ee 6px 12px); border-left: 3px solid var(--good);"></div>
+        </div>
+        <p class="small">The test set stays <strong>100% real</strong>: 67,922 payments, locked away before training.</p>
       </div>
     </div>
-    <div class="grid-2">
-      <div class="card"><span class="tag t-burg">Test set</span><h3>100% real payments</h3><p class="small">20% locked away before training. All results are measured there.</p></div>
-      <div class="card"><span class="tag t-burg">For a real bank</span><h3>Its own payments</h3><p class="small">Retrain on the bank's data, with fraud labels from chargebacks.</p></div>
-    </div>
+    <p class="tiny">Model results in this pitch: measured on our prototype dataset.</p>
   </div>
   <aside class="notes">
     <div class="say">
     <ul>
-      <li>(~50 s) Our data: a public Kaggle dataset, 339,607 card payments from 13 western US states, 2019–2020. Lecture 2: an existing dataset is cheap and ready today, but it was collected by someone else for someone else.</li>
-      <li>The core challenge: only 1,782 frauds, 1 in 191. A model hardly sees any fraud to learn from.</li>
-      <li>Our fix: generated data. SMOTE creates new fraud examples by blending similar real frauds, until the training data is 50/50: 268,833 synthetic frauds made from 1,426 real ones. We also tested the alternative, class weights, where rare fraud simply counts more.</li>
-      <li>The test set (67,922 payments) stays 100% real and untouched, so every result we show is on real payments.</li>
-      <li>For a real bank: retrain on its own payments; the fraud label then comes from chargebacks weeks later. Check whether the Kaggle data is simulated, and say so if asked.</li>
+      <li>(~50 s) Our model is fed by five sources. The payment system streams every payment live; customer, merchant and card-network data refresh daily. In the demo you will see the payment stream and the feedback labels; the other sources are the production plan.</li>
+      <li>The fraud answers are the labels the model learns from. They arrive with delays: analyst reviews the same day, customer complaints within days, chargebacks after up to 60 days.</li>
+      <li>Every night the data is checked and saved as a dated version, so we always know which data trained which model.</li>
+      <li>We built the model on a prototype dataset of 339,607 past payments. Only 1,782 are fraud, so we generated synthetic fraud for training. The test set stays 100% real.</li>
     </ul>
     </div>
     <div class="more">
-      <p><strong>The dataset.</strong> Public Kaggle dataset “credit-card-fraud-dataset” (dhruvb2028): 339,607 card payments from 2019–2020 in 13 western US states, 14 merchant categories, 15 columns per payment (time, merchant, category, amount, city, state, customer location, city population, job, date of birth, transaction ID, merchant location, fraud label), with no missing values.</p>
-      <p><strong>The source decision (Lecture 2).</strong> Of the four data sources in Lecture 2 (existing datasets, own collection, video, generated), we used an existing dataset: low cost and ready today, but collected by someone else for someone else. A real bank would retrain on its own payments, with fraud labels that arrive weeks later through chargebacks. If asked whether the data is simulated, check the Kaggle page before answering.</p>
-      <p><strong>The split.</strong> Before any modelling, 20% was locked away as the test set, stratified to keep the same fraud ratio and with a fixed random seed (42) so it can be rebuilt. Training set: 271,685 payments with 1,426 frauds. Test set: 67,922 payments with 356 frauds. All results in the pitch come from this real, untouched test set.</p>
-      <p><strong>How the synthetic fraud is made (SMOTE).</strong> For a real fraud case, SMOTE picks one of its five most similar fraud cases and creates a new example somewhere on the line between them. Repeating this until both classes are equal gave 270,259 legitimate and 270,259 fraud examples, so 268,833 fraud examples are synthetic. Only the training data was balanced.</p>
-      <p><strong>Two approaches tested.</strong> SMOTE was used for Logistic Regression, Decision Tree and Random Forest. XGBoost and LightGBM used class weights instead: no data is generated, the rare fraud cases simply count more during training. Lesson learned: because SMOTE ran before cross-validation, synthetic copies leaked into the validation folds and made those scores look too good (Random Forest 0.999 in validation vs 0.768 on the test set). The fix is to generate synthetic data inside each fold. Lecture 2 warns about this: generated data is cheap but may not look real.</p>
+      <p><strong>Live vs daily.</strong> Payment data must be live because the model scores each payment while the customer waits. Customer, merchant and network data change slowly, so a nightly refresh is enough. Lecture 2: information saved at capture costs nothing; added a month later it costs days, so every payment is stored with its score, model version and decision.</p>
+      <p><strong>Labels with delays.</strong> Fraud is only confirmed later. Analyst reviews of flagged payments give same-day labels, customer complaints about approved payments reveal missed fraud within days, and chargebacks arrive after 30–60 days. The model can only be judged and retrained on payments whose answers have arrived (Lecture 8: who holds the answer sheet, and when).</p>
+      <p><strong>The nightly job.</strong> Load the day's payments, run data checks (missing fields, changed formats, unusual volumes; a failed check stops the run and alerts the data engineer), refresh customer profiles, attach new fraud answers, save a dated dataset version (Lecture 2: which exact data trained the model?).</p>
+      <p><strong>The prototype dataset.</strong> A public dataset with the same structure as card-payment data: 339,607 payments, 2019–2020, 15 columns, no missing values. 20% was locked away as the test set (67,922 payments, 356 frauds), stratified and with a fixed seed. The training set (271,685 payments, 1,426 frauds) was balanced with SMOTE: each synthetic fraud is placed between a real fraud and one of its five most similar frauds, giving 270,259 of each class. XGBoost and LightGBM used class weights instead. If asked: the prototype is a public dataset, because a student team cannot use real customers' data.</p>
     </div>
   </aside>
 </section>
@@ -427,31 +521,33 @@
 <!-- ════════════════════════════════════════════════════════════════════════ -->
 <section class="slide" data-phase="3" data-title="What fraud looks like">
   <div class="kicker">Data · Signals</div>
-  <h2>What fraud looks like, turned into signals</h2>
+  <h2>What fraud looks like,<br><span class="hl">turned into signals</span></h2>
   <p class="lead">We explored the data first. Each pattern became an input for the model.</p>
 
   <div class="body">
     <div class="split" style="grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);">
-      <div class="card" style="display: flex; flex-direction: column; height: 400px;">
-        <div class="row" style="justify-content: space-between; align-items: baseline;">
-          <h3>Fraud rate by hour of day</h3>
-          <span class="tiny">all payments</span>
-        </div>
+      <div class="card" style="display: flex; flex-direction: column; height: 330px;">
+        <div class="sec">Fraud rate by hour of day <span class="chip sim">Prototype</span></div>
         <div class="chart-box"><canvas id="chartHour"></canvas></div>
-        <p class="tiny" style="margin-top: 6px;"><strong class="t-fraud">86% of all fraud</strong> happens 22:00–03:59, a window with only 23% of payments.</p>
+        <p class="tiny" style="margin-top: 6px;"><strong class="t-good">86% of all fraud</strong> happens 22:00–03:59, a window with only 23% of payments.</p>
       </div>
-      <div class="card" style="padding: 8px 14px;">
-        <table class="data">
-          <thead><tr><th>Pattern in the data</th><th></th><th>Signal for the model</th></tr></thead>
-          <tbody>
-            <tr><td><strong>Night</strong><br><span class="small">fraud rate 1.92% at night vs 0.10% by day</span></td><td class="t-burg">&rarr;</td><td><span class="mono" style="font-size: 12px;">hour, day of week</span></td></tr>
-            <tr><td><strong>Large amounts</strong><br><span class="small">average $518 vs $68; half of frauds &gt; $500</span></td><td class="t-burg">&rarr;</td><td><span class="mono" style="font-size: 12px;">amount, log amount</span></td></tr>
-            <tr><td><strong>Online and grocery</strong><br><span class="small">online shopping 1.44%, grocery 1.32% vs home 0.15%</span></td><td class="t-burg">&rarr;</td><td><span class="mono" style="font-size: 12px;">merchant category</span></td></tr>
-            <tr><td><strong>Older customers</strong><br><span class="small">60+: 0.72% vs 0.35% for ages 30–45</span></td><td class="t-burg">&rarr;</td><td><span class="mono" style="font-size: 12px;">age</span></td></tr>
-            <tr style="background: var(--card-tint);"><td><strong>Far from home?</strong><br><span class="small">tested: no, both ~76 km on average</span></td><td class="t-burg">&rarr;</td><td><span class="mono" style="font-size: 12px;">distance</span><br><span class="tiny"><em>assumption failed</em></span></td></tr>
-          </tbody>
-        </table>
-        <p class="small" style="margin: 10px 0 4px;"><strong>15 raw columns &rarr; 39 model inputs.</strong></p>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div class="card" style="padding: 8px 14px;">
+          <table class="data">
+            <thead><tr><th>Pattern in the data</th><th></th><th>Signal for the model</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Night</strong><br><span class="small">fraud rate 1.92% at night vs 0.10% by day</span></td><td class="t-burg">&rarr;</td><td><span class="mono" style="font-size: 12px;">hour, day of week</span></td></tr>
+              <tr><td><strong>Large amounts</strong><br><span class="small">average $518 vs $68; half of frauds &gt; $500</span></td><td class="t-burg">&rarr;</td><td><span class="mono" style="font-size: 12px;">amount</span></td></tr>
+              <tr><td><strong>Online and grocery</strong><br><span class="small">online shopping 1.44% vs home goods 0.15%</span></td><td class="t-burg">&rarr;</td><td><span class="mono" style="font-size: 12px;">merchant category</span></td></tr>
+              <tr><td><strong>Older customers</strong><br><span class="small">60+: 0.72% vs 0.35% for ages 30–45</span></td><td class="t-burg">&rarr;</td><td><span class="mono" style="font-size: 12px;">age</span></td></tr>
+              <tr style="background: var(--card-tint);"><td><strong>Far from home?</strong><br><span class="small">tested: no, both ~76 km on average</span></td><td class="t-burg">&rarr;</td><td><span class="mono" style="font-size: 12px;">distance</span><br><span class="tiny"><em>assumption failed</em></span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card tint" style="padding: 12px 18px;">
+          <span class="chip live">Added in production</span>
+          <p class="small">payments in the last hour · new device · spend vs this customer's usual · merchant's recent fraud</p>
+        </div>
       </div>
     </div>
   </div>
@@ -459,16 +555,16 @@
     <div class="say">
     <ul>
       <li>(~45 s) Before building any model, we looked at what makes fraud different, and turned each finding into a signal.</li>
-      <li>Night: 86% of fraud happens between 22:00 and 04:00, a window with only 23% of payments. Amount: fraud averages $518 vs $68. Category: online shopping and grocery have the highest fraud rates. Age: customers over 60 are targeted twice as often as 30–45 year olds.</li>
-      <li>We also tested an assumption: "fraud happens far from home". The data said no: both are about 76 km. Lesson: test assumptions with data.</li>
+      <li>Night: 86% of fraud happens between 22:00 and 04:00. Amount: fraud averages $518 vs $68. Online shopping and grocery have the highest fraud rates. Customers over 60 are targeted twice as often as 30–45 year olds.</li>
+      <li>We also tested "fraud happens far from home": the data said no. Lesson: test assumptions with data.</li>
+      <li>In production we add behaviour signals our live data gives us: how many payments in the last hour, a new device, spending far above the customer's usual.</li>
     </ul>
     </div>
     <div class="more">
-      <p><strong>From pattern to signal.</strong> Before training anything we explored the data to see what makes fraud different, then turned each finding into an input the model can use. This step is called feature engineering: 15 raw columns became 39 model inputs. All numbers on this slide are computed from the full dataset.</p>
-      <p><strong>Night.</strong> 86% of all fraud happens between 22:00 and 03:59, a window with only 23% of payments. The fraud rate at night is 1.92% against 0.10% in the daytime, about 19 times higher. Signals: hour and day of week, extracted from the timestamp.</p>
-      <p><strong>Large amounts.</strong> Fraud averages $518 against $68 for normal payments (medians $356 vs $46); 47% of frauds are above $500. Signals: the amount and its logarithm, which compresses the range from $1 to over $28,000 so very large values do not dominate.</p>
-      <p><strong>Merchant category and age.</strong> Online shopping (1.44%), in-store grocery (1.32%) and online miscellaneous (1.28%) have the highest fraud rates, against 0.15% for home goods; each category becomes a yes/no column. Customers over 60 have a fraud rate of 0.72%, double the 0.35% of 30–45 year olds; age is calculated from date of birth at the time of the payment.</p>
-      <p><strong>The assumption that failed.</strong> We expected fraud to happen far from the cardholder's home. We calculated the distance between home and merchant for every payment: the average is 75.6 km for both fraud and normal payments. We kept the feature, but the lesson is clear: test assumptions with data instead of trusting intuition.</p>
+      <p><strong>From pattern to signal.</strong> This step is called feature engineering: the 15 raw columns of the prototype data became 39 model inputs. All numbers on this slide are computed from the full prototype dataset.</p>
+      <p><strong>The findings.</strong> Night: fraud rate 1.92% at night vs 0.10% in the daytime, about 19 times higher. Amount: medians $356 vs $46; 47% of frauds are above $500; the model also uses the logarithm of the amount to tame the range up to $28,000. Category: online shopping 1.44%, in-store grocery 1.32%, online miscellaneous 1.28% vs 0.15% for home goods. Age: 0.72% for customers over 60 vs 0.35% for 30–45 year olds.</p>
+      <p><strong>The failed assumption.</strong> We calculated the distance between home and merchant for every payment: 75.6 km on average for both fraud and normal payments. We kept the feature, but the lesson is to test intuition with data.</p>
+      <p><strong>Added in production.</strong> Live data gives behaviour signals the prototype data does not have: velocity (payments per card in the last hour), a new device or new country, spending compared with this customer's usual pattern, and the merchant's recent fraud rate. These are the strongest signals in modern fraud detection, because most fraud today is online and mobile, where a stolen card behaves differently from its owner. They are part of the NordPay plan, not of our prototype results.</p>
     </div>
   </aside>
 </section>
@@ -478,82 +574,68 @@
 <!-- ════════════════════════════════════════════════════════════════════════ -->
 <section class="slide" data-phase="4" data-title="How we built it">
   <div class="kicker">Build · Choosing the model</div>
-  <h2>Five models tested. One champion.</h2>
+  <h2>Five models tested.<br><span class="hl">One champion.</span></h2>
   <p class="lead">From a simple baseline to more complex models, all judged on the same real test payments.</p>
 
   <div class="body">
     <div class="split" style="grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);">
-      <div class="card" style="display: flex; flex-direction: column; height: 300px;">
-        <div class="row" style="justify-content: space-between; align-items: baseline;">
-          <h3>Frauds caught and false alarms</h3>
-          <span class="tiny">locked test set</span>
-        </div>
+      <div class="card" style="display: flex; flex-direction: column; height: 262px;">
+        <div class="sec">Frauds caught and false alarms <span class="chip sim">Prototype</span></div>
         <div class="chart-box"><canvas id="chartModels"></canvas></div>
       </div>
-      <div class="card burg" style="display: flex; flex-direction: column; justify-content: center; gap: 10px;">
-        <span class="tag t-burg" style="align-self: flex-start;">Champion · LightGBM</span>
-        <h3>Many small decision trees, each fixing the last one's mistakes</h3>
-        <div class="row" style="gap: 28px; margin-top: 6px;">
-          <div class="stat"><div class="num t-fraud" style="font-size: 36px;">84%</div><div class="lbl">fraud caught</div></div>
-          <div class="stat"><div class="num t-amber" style="font-size: 36px;">24</div><div class="lbl">false alarms</div></div>
-        </div>
-        <p class="small">Not the top catcher: XGBoost caught 13 more, but with twice the false alarms.</p>
+      <div class="card bench" style="display: flex; flex-direction: column; justify-content: center; gap: 12px;">
+        <span class="tag">Champion · production model</span>
+        <div class="model">LightGBM v1.0</div>
+        <div class="stats">recall 83.99% · prec 92.57%<br>F1 0.8807 · AUC 0.9978<br>299 of 356 caught · 24 false alarms</div>
+        <p class="small">Many small decision trees, each fixing the last one's mistakes. Not the top catcher: XGBoost caught 13 more, with twice the false alarms.</p>
       </div>
     </div>
 
     <div class="card tint" style="padding: 14px 22px;">
       <div class="row" style="justify-content: space-between; align-items: baseline; margin-bottom: 10px;">
-        <span class="tag t-burg" style="margin: 0;">How the score is used</span>
-        <span class="tiny">when unsure, a person decides</span>
+        <span class="sec" style="border: none; padding: 0; margin: 0;">How the score is used</span>
+        <span class="tiny">every flagged payment is reviewed by a person</span>
       </div>
       <div class="row" style="gap: 6px; height: 40px;">
-        <div style="flex: 10; background: var(--card); border: 1px solid var(--line-strong); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px;"><strong>Approve</strong>&nbsp; low score</div>
-        <div style="flex: 3; background: var(--amber-bg); border: 1px solid #efdcb8; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px;"><strong class="t-amber">Analyst review</strong></div>
-        <div style="flex: 6; background: var(--fraud-bg); border: 1px solid #e8c4c9; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px;"><strong class="t-fraud">Block</strong>&nbsp; high score</div>
+        <div style="flex: 1; background: #111; border: 2px solid #111; border-radius: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #fff;"><strong style="color: #fff;">Approve</strong>&nbsp; fraud probability below 0.5</div>
+        <div style="flex: 1; background: #fff; border: 2px solid #111; border-radius: 0; display: flex; align-items: center; justify-content: center; font-size: 14px;"><strong class="t-fraud">Flag as fraud</strong>&nbsp; 0.5 and above &rarr; manual review</div>
       </div>
     </div>
   </div>
   <aside class="notes">
     <div class="say">
     <ul>
-      <li>(~50 s) Lecture 3: start simple, change one idea at a time. We trained five models, from a simple straight-line model to tree ensembles, tuned each with cross-validation and judged all on the same locked test set.</li>
-      <li>Baseline (Logistic Regression) caught 237 frauds with 641 false alarms. The champion, LightGBM, caught 299 (84%) with only 24 false alarms.</li>
-      <li>We chose on balance, not on the single highest number: XGBoost caught 13 more but with 47 false alarms. Honest note: with only 356 frauds, a gap of 13 is within the noise (about ±14), so it's a business choice to confirm on live data.</li>
-      <li>The model outputs a score. Low: approve. High (0.4 and up): block. In between (0.1–0.4): a fraud analyst decides. On our test set that middle band holds only about 23 payments, 6 of them fraud.</li>
-      <li>Details in the backup deck: experiment log, threshold tuning, and the lesson that synthetic data made validation look too good.</li>
+      <li>(~50 s) Lecture 3: start simple, change one idea at a time. We trained five models, from a simple straight-line model to tree ensembles, and judged all on the same locked test set.</li>
+      <li>The baseline caught 237 frauds with 641 false alarms. The champion, LightGBM, caught 299 (84%) with only 24 false alarms.</li>
+      <li>We chose on balance: XGBoost caught 13 more, but with twice the false alarms.</li>
+      <li>The model gives a fraud probability: below 0.5 the payment is approved, at 0.5 and above it is flagged as fraud and reviewed by an analyst.</li>
     </ul>
     </div>
     <div class="more">
-      <p><strong>The approach (Lecture 3).</strong> Start with a simple baseline and add complexity one idea at a time, so each improvement can be explained. Logistic Regression tests a single straight-line rule; Decision Tree tests yes/no rule combinations; Random Forest tests a vote of many trees; XGBoost tests trees that correct each other's mistakes; LightGBM tests the same idea, built for speed. Each model was tuned automatically with 5-fold cross-validation on the training data only, then judged once on the locked test set.</p>
-      <p><strong>Results on the test set</strong> (Recall / precision / F1): Logistic Regression 0.67 / 0.27 / 0.38; Decision Tree 0.77 / 0.63 / 0.70; Random Forest 0.70 / 0.85 / 0.77; XGBoost 0.88 / 0.87 / 0.87; LightGBM 0.84 / 0.93 / 0.88, with ROC-AUC 0.998. Precision is the share of alarms that were real fraud; F1 balances Recall and precision.</p>
-      <p><strong>Why LightGBM.</strong> It has the best balance (highest F1) and the fewest false alarms: 24, against 47 for XGBoost. XGBoost caught 13 more frauds, but with only 356 fraud cases our Recall is uncertain by about ±4 points (≈ ±14 frauds), so a gap of 13 could be luck. We treated the choice as a business trade-off to confirm on live data, not as a proven win.</p>
-      <p><strong>From score to decision.</strong> The model outputs a fraud score. The default cutoff is 0.5; lowering it to 0.4 catches 304 instead of 299 frauds for 28 instead of 24 false alarms and gives the highest F1 (0.884). We propose three bands: approve below 0.1, block at 0.4 and above, and send the band in between to a fraud analyst. On the test set that middle band holds only about 23 payments, 6 of them fraud, a tiny workload with high value (Lecture 5: a rule for “not sure”; Lecture 6: when unsure, a person decides).</p>
+      <p><strong>The approach (Lecture 3).</strong> Logistic Regression tests a single straight-line rule; Decision Tree tests yes/no rule combinations; Random Forest a vote of many trees; XGBoost trees that correct each other's mistakes; LightGBM the same idea, built for speed. Each model was tuned automatically with 5-fold cross-validation on the training data only, then judged once on the locked test set of our prototype dataset.</p>
+      <p><strong>Results</strong> (Recall / precision / F1): Logistic Regression 0.67 / 0.27 / 0.38; Decision Tree 0.77 / 0.63 / 0.70; Random Forest 0.70 / 0.85 / 0.77; XGBoost 0.88 / 0.87 / 0.87; LightGBM 0.84 / 0.93 / 0.88, ROC-AUC 0.998. Precision is the share of alarms that were real fraud; F1 balances Recall and precision.</p>
+      <p><strong>Why LightGBM.</strong> Best balance (highest F1) and fewest false alarms. With only 356 fraud cases, Recall is uncertain by about ±4 points (≈ ±14 frauds), so XGBoost's 13 extra catches could be luck; the choice is a business trade-off to confirm in shadow mode.</p>
+      <p><strong>From score to decision.</strong> The production pipeline flags a payment at a fraud probability of 0.5 or more and sends it to manual review. In the notebook, lowering the cutoff to 0.4 caught 304 instead of 299 frauds for 28 instead of 24 false alarms (highest F1, 0.884); this is a candidate change for a future release, to be confirmed on live data. Under EU payment rules (PSD2), low-risk payments may also skip extra authentication, so a good score means fewer checks for honest customers.</p>
     </div>
   </aside>
 </section>
 
 <!-- ════════════════════════════════════════════════════════════════════════ -->
-<!--  7 · AI PIPELINE (PLACEHOLDER)                                         -->
+<!--  7 · AI PIPELINE: ONE PAYMENT                                          -->
 <!-- ════════════════════════════════════════════════════════════════════════ -->
 <section class="slide" data-phase="4" data-title="AI pipeline">
-  <div class="kicker">Build · Pipeline</div>
-  <h2>The AI pipeline</h2>
-
-  <div class="placeholder" style="margin-top: 16px;">
-    <div class="tag t-burg">Placeholder</div>
-    <h3>Pipeline content to be added</h3>
-    <p class="small" style="max-width: 560px;">This slide will be filled with the pipeline supplied by our teammate: how a payment flows from the data to the model's verdict, leading into the demo.</p>
+  <div class="body center" style="align-items: center; text-align: center;">
+    <div class="kicker">Build · Pipeline · Live</div>
+    <h1>The AI <span class="hl">pipeline</span></h1>
+    <p class="lead" style="margin-top: 14px;">Interactive walkthrough by Ģirts</p>
+    <div class="row" style="justify-content: center; gap: 12px; margin-top: 26px;"><span class="btn primary">&#9654; Open AI pipeline</span><span class="btn">Live · localhost</span></div>
   </div>
   <aside class="notes">
     <div class="say">
     <ul>
-      <li>(~45 s) Placeholder: pipeline content and speaker notes to be provided by teammate.</li>
-      <li>End by handing over to the demo: "Let's see it in action."</li>
+      <li>Placeholder: Ģirts switches to the interactive AI pipeline (localhost): real-time decision, feedback loop, nightly retraining.</li>
+      <li>If localhost is unavailable, use the backup slide "Pipeline map" at the end of the deck.</li>
     </ul>
-    </div>
-    <div class="more">
-      <p><strong>Placeholder.</strong> Background material for this slide will be provided by the teammate presenting the pipeline.</p>
-      <p><strong>Suggested structure (Lecture 6).</strong> Train &rarr; export &rarr; catalogue &rarr; build &rarr; deploy &rarr; serve &rarr; watch, with each step marked as done in our project or planned for production.</p>
     </div>
   </aside>
 </section>
@@ -564,43 +646,37 @@
 <section class="slide" data-phase="5" data-title="Live demo">
   <div class="body center" style="align-items: center; text-align: center;">
     <div class="kicker">Demo · Live</div>
-    <h1>See demo</h1>
+    <h1>See <span class="hl">demo</span></h1>
+    <div class="row" style="justify-content: center; gap: 12px; margin-top: 30px;"><span class="btn primary">&#9654; Send transaction</span><span class="btn">Send suspicious</span><span class="btn">Stream mode</span></div>
   </div>
   <aside class="notes">
     <div class="say">
     <ul>
-      <li>(~1:30) Switch to the demo window (Flask API on port 5050, Next.js dashboard on port 3000).</li>
-      <li>Suggested order: an everyday purchase (approved), a payment with the fraud fingerprint: night, large amount, online (blocked), a borderline case (show how the score decides).</li>
-      <li>Backup plan: have screenshots ready in case the demo fails.</li>
+      <li>Placeholder: Ģirts presents the live demo from Docker.</li>
     </ul>
-    </div>
-    <div class="more">
-      <p><strong>What runs behind the demo.</strong> The trained LightGBM model is saved together with the scaler and the exact list and order of the 39 input columns. A Flask API (port 5050) loads these files and scores one payment at a time; a Next.js dashboard (port 3000) generates test payments, sends them to the API and shows the verdict. Both run together with Docker Compose.</p>
-      <p><strong>Why the saved column list matters.</strong> If the API built its inputs in a different order than during training, every prediction would be silently wrong with no error message. Lecture 2 lists this kind of silent pitfall (for example a renumbered class list). Saving the feature list with the model prevents it.</p>
-      <p><strong>Preparation.</strong> Test the three demo cases on the presenting laptop beforehand and note the exact inputs that give approve, block and borderline results. Keep screenshots ready as a fallback, and keep the demo to about 90 seconds.</p>
     </div>
   </aside>
 </section>
 
 <!-- ════════════════════════════════════════════════════════════════════════ -->
-<!--  8 · LAUNCH, MEASURE, RISKS, NEXT                                      -->
+<!--  9 · LAUNCH, MEASURE, RISKS, IMPROVE                                   -->
 <!-- ════════════════════════════════════════════════════════════════════════ -->
 <section class="slide" data-phase="6" data-title="Launch and next steps">
-  <div class="kicker">Launch &amp; next · From demo to bank</div>
-  <h2>How we'd launch it, and keep it right</h2>
+  <div class="kicker">Launch &amp; next · Running it at NordPay</div>
+  <h2>How we launch it,<br><span class="hl">and keep it right</span></h2>
   <p class="lead">Prove it on live payments first, measure it in money, and keep it learning.</p>
 
   <div class="body">
     <div class="grid-4">
       <div class="card">
-        <span class="tag t-burg">Launch</span>
+        <span class="tag t-burg">First launch</span>
         <h3>Small steps</h3>
         <p class="small"><strong>Shadow mode:</strong> score live payments, block nothing. Then 5% &rarr; 25% &rarr; 100%, with an off switch.</p>
       </div>
       <div class="card">
         <span class="tag t-burg">Measure</span>
         <h3>In money</h3>
-        <p class="small"><strong>$32,120</strong> less fraud loss than the baseline, on the test set alone. Live: confirmed by chargebacks.</p>
+        <p class="small"><strong>$32,120</strong> less fraud loss than the baseline on the prototype test set. Live: confirmed by analyst reviews, complaints and chargebacks.</p>
       </div>
       <div class="card">
         <span class="tag t-burg">Risks</span>
@@ -608,9 +684,9 @@
         <p class="small">Fraudsters adapt (drift). Wrong blocks hurt customers. Personal data under GDPR.</p>
       </div>
       <div class="card">
-        <span class="tag t-burg">Next</span>
-        <h3>Learn from misses</h3>
-        <p class="small">Every missed fraud &rarr; find similar &rarr; analysts confirm &rarr; retrain.</p>
+        <span class="tag t-burg">Improve</span>
+        <h3>Every night</h3>
+        <p class="small">An AI agent retrains on new labels; a new model ships only if it beats the benchmark and a data scientist signs off.</p>
       </div>
     </div>
     <div class="callout">
@@ -621,19 +697,98 @@
   <aside class="notes">
     <div class="say">
     <ul>
-      <li>(~50 s) Launch (Lecture 8): first shadow mode, where the model scores real payments but blocks nothing. Fraud is confirmed by chargebacks up to ~60 days later, so we wait before judging. Then a canary release: 5%, 25%, 100% of payments, always with a way back.</li>
-      <li>Measure: success in money. On the test set, the champion prevents about $32,120 more fraud loss than the baseline model (62 more frauds × $518). Live, we'd also track false alarms, complaints and results per customer group.</li>
-      <li>Risks: fraudsters change tactics, so the model ages; real customers wrongly blocked; personal data (birth date, location) under GDPR.</li>
-      <li>Next (Lecture 2, data engine): each missed fraud becomes training data for the next model.</li>
-      <li>Close with the one-liner, then open for questions. The backup deck has all details.</li>
+      <li>(~50 s) First launch: shadow mode, where the model scores real payments but blocks nothing; then a canary release, 5%, 25%, 100%, always with a way back. After that, updates come through the nightly loop you saw in the pipeline.</li>
+      <li>Measure: on the prototype test set the champion prevents about $32,120 more fraud loss than the baseline. Live, success is confirmed by analyst reviews, customer complaints and chargebacks.</li>
+      <li>Risks: fraudsters adapt, wrong blocks hurt real customers, and we handle personal data under GDPR.</li>
+      <li>Improve: every night an AI agent retrains on the new labels, and a new model only ships if it beats the benchmark and a data scientist signs off. Close with the one-liner, then questions.</li>
     </ul>
     </div>
     <div class="more">
-      <p><strong>Launch in small steps (Lecture 8).</strong> A test score is only a promise: in the SickKids silent trial a model scored 0.90 on old data but 0.50 on new patients. So we would first run in shadow mode, scoring every real payment but blocking nothing. Fraud is only confirmed when chargebacks arrive, up to about 60 days later (Stripe has the same delay), so we wait before judging. Then a canary release: 5%, 25%, then 100% of payments decided by the model, compared with today's rules in the same weeks, with an off switch at every step.</p>
-      <p><strong>Measure in money.</strong> On the test set the champion catches 62 more frauds than the baseline model; at the average fraud value of $518 that is about $32,120 less loss on 67,922 payments. Live, we would track confirmed fraud caught, false alarms and complaints, losses prevented per month, and results per customer group. Because a blocked payment never tells us whether it was really fraud, a person reviews a small random sample of blocks each week.</p>
-      <p><strong>Main risks.</strong> Drift: fraudsters change tactics, so the model ages and must be retrained. Wrong blocks hurt real customers. Unequal errors: age is one of the model's strongest signals, so error rates must be checked per age group. Privacy: the data contains birth dates, jobs and home locations, which falls under GDPR (access by role, deletion on request).</p>
-      <p><strong>Next steps (Lecture 2, the data engine).</strong> Every missed fraud starts a loop: find similar payments, let analysts confirm them, retrain, and compare with the current champion. First targets: study the 57 frauds the model missed, version the data as well as the model, and retrain on the bank's own payments.</p>
-      <p><strong>Closing line.</strong> “The hard part was not the algorithm. It was the decisions before and after it.” Then open for questions; the backup deck has every detail.</p>
+      <p><strong>Launch in small steps (Lecture 8).</strong> A test score is only a promise: in the SickKids silent trial a model scored 0.90 on old data but 0.50 on new patients. Shadow mode checks the promise on NordPay's live payments without affecting customers. Analyst reviews and customer complaints give a first read within days; chargebacks complete the picture after about 60 days (Stripe faces the same delay). The canary release compares the model with today's rules in the same weeks, not before vs after.</p>
+      <p><strong>Measure in money.</strong> On the prototype test set the champion catches 62 more frauds than the baseline; at the average fraud value of $518 that is about $32,120 less loss on 67,922 payments. Live KPIs: fraud caught, false alarms and complaints, losses prevented per month, analyst workload, results per customer group, and how often analysts overturn the model's flags (step 09 in the pipeline gives us this for every flagged payment).</p>
+      <p><strong>Main risks.</strong> Drift: fraud patterns change, so the model ages (Lecture 8: Instacart in 2020). Wrong blocks hurt real customers. Unequal errors: age is one of the strongest signals, so error rates are checked per age group. Privacy: birth dates and home locations fall under GDPR (access by role, deletion on request, a documented model). One bad input, such as a wrong address, can corrupt several signals, so inputs are checked and rules are the fallback.</p>
+      <p><strong>Improve every night (Lecture 2, the data engine).</strong> Every analyst review and customer complaint becomes a label. At 02:00 an AI agent retrains a candidate and compares it with the production benchmark; a data scientist signs off before release, and larger changes can still go through shadow mode first. First targets: study the 57 frauds the prototype missed, and add the behaviour signals from live data.</p>
+      <p><strong>Closing line.</strong> "The hard part was not the algorithm. It was the decisions before and after it." Then open for questions; the backup deck has every detail.</p>
+    </div>
+  </aside>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!--  BACKUP · PIPELINE MAP (mirrors Ģirts' demo, steps 01–16)              -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<section class="slide" data-title="Backup: pipeline map">
+  <div class="kicker">Backup · If the live pipeline is unavailable</div>
+  <h2>How the AI pipeline<br><span class="hl">makes a decision</span> and learns</h2>
+  <p class="lead">One payment through every step, then how human feedback retrains the model every night.</p>
+
+  <div class="body" style="gap: 12px; padding-top: 18px;">
+    <!-- Lane 1 -->
+    <div class="row" style="align-items: stretch; gap: 14px;">
+      <div style="width: 170px; flex-shrink: 0;">
+        <span class="tag t-fraud">Every payment</span>
+        <h3 style="font-size: 18px;">Real-time decision</h3>
+        <p class="tiny">steps 01–08, in milliseconds</p>
+      </div>
+      <div class="row" style="flex: 1; gap: 8px; align-items: stretch;">
+        <div class="card tint" style="flex: 1; padding: 10px 12px;"><div class="tiny mono">Intake</div><p class="small" style="margin-top: 4px;"><strong>01</strong> Transaction source<br><strong>02</strong> API &amp; validation</p></div>
+        <div class="t-burg" style="align-self: center;">&rarr;</div>
+        <div class="card tint" style="flex: 1.25; padding: 10px 12px;"><div class="tiny mono">Preprocessing</div><p class="small" style="margin-top: 4px;"><strong>03</strong> Feature engineering<br><strong>04</strong> One-hot encoding · <strong>05</strong> Scaling</p></div>
+        <div class="t-burg" style="align-self: center;">&rarr;</div>
+        <div class="card burg" style="flex: 1; padding: 10px 12px;"><div class="tiny mono t-burg">Model</div><p class="small" style="margin-top: 4px;"><strong>06</strong> LightGBM<br><strong>07</strong> Fraud probability</p></div>
+        <div class="t-burg" style="align-self: center;">&rarr;</div>
+        <div class="card" style="flex: 1.3; padding: 10px 12px;"><div class="tiny mono">Decision · 08</div><p class="small" style="margin-top: 4px;">p &lt; 0.5 &rarr; <strong>Approve</strong><br>p &ge; 0.5 &rarr; <strong class="t-fraud">Flag as fraud</strong></p></div>
+      </div>
+    </div>
+
+    <!-- Lane 2 -->
+    <div class="row lane-grey" style="align-items: stretch; gap: 14px;">
+      <div style="width: 170px; flex-shrink: 0;">
+        <span class="tag t-amber">Human in the loop</span>
+        <h3 style="font-size: 18px;">Feedback loop</h3>
+        <p class="tiny">steps 09–11, during the day</p>
+      </div>
+      <div class="row" style="flex: 1; gap: 8px; align-items: stretch;">
+        <div class="card amber" style="flex: 1; padding: 10px 12px;"><div class="tiny mono t-amber">Flagged payment</div><p class="small" style="margin-top: 4px;"><strong>09</strong> Manual review by an analyst</p></div>
+        <div class="card amber" style="flex: 1; padding: 10px 12px;"><div class="tiny mono t-amber">Approved payment</div><p class="small" style="margin-top: 4px;"><strong>10</strong> Customer complaint? Reveals a missed fraud</p></div>
+        <div class="t-burg" style="align-self: center;">&rarr;</div>
+        <div class="card" style="flex: 1.3; padding: 10px 12px;"><div class="tiny mono">Every human answer</div><p class="small" style="margin-top: 4px;"><strong>11</strong> Labelled feedback data: new training examples</p></div>
+      </div>
+    </div>
+
+    <!-- Lane 3 -->
+    <div class="row lane-dark" style="align-items: stretch; gap: 14px;">
+      <div style="width: 170px; flex-shrink: 0;">
+        <span class="tag t-burg">Every night · 02:00</span>
+        <h3 style="font-size: 18px;">Nightly retraining</h3>
+        <p class="tiny">steps 12–16, AI agent + people</p>
+      </div>
+      <div class="row" style="flex: 1; gap: 8px; align-items: stretch;">
+        <div class="card" style="flex: 1; padding: 10px 12px;"><div class="tiny mono">AI agent</div><p class="small" style="margin-top: 4px;"><strong>12</strong> OpenClaw retrains a candidate on the new labels</p></div>
+        <div style="align-self: center; color: var(--yellow);">&rarr;</div>
+        <div class="card" style="flex: 1; padding: 10px 12px; background: var(--yellow); border-color: var(--yellow);"><div class="tiny mono" style="color: #111;">Gate · 13</div><p class="small" style="margin-top: 4px;">Better than the production benchmark?</p></div>
+        <div style="align-self: center; color: var(--yellow);">&rarr;</div>
+        <div class="card burg" style="flex: 1.35; border-color: var(--yellow); padding: 10px 12px;"><div class="tiny mono t-burg">Yes</div><p class="small" style="margin-top: 4px;"><strong>14</strong> Data scientist signs off &rarr; <strong>15</strong> publish &rarr; deployed to step 06</p></div>
+        <div class="card tint" style="flex: 0.8; padding: 10px 12px;"><div class="tiny mono">No</div><p class="small" style="margin-top: 4px;"><strong>16</strong> Keep current model</p></div>
+      </div>
+    </div>
+
+    <p class="tiny" style="text-align: right;">Benchmark: LightGBM v1.0 · Recall 84.0% · precision 92.6% · F1 0.881 · AUC 0.998</p>
+  </div>
+  <aside class="notes">
+    <div class="say">
+    <ul>
+      <li>(~60 s) This is our AI pipeline, the same one you'll see live in a moment. It has three loops.</li>
+      <li>Every payment: the transaction comes in, is validated, turned into model inputs, scored by LightGBM, and the decision is made. Below a probability of 0.5 it is approved, above it is flagged as fraud.</li>
+      <li>During the day, people close the loop: an analyst reviews every flagged payment, and a customer complaint about an approved payment reveals a fraud we missed. Every human answer becomes a new training example.</li>
+      <li>Every night at 02:00 an AI agent retrains a candidate model on the new labels. Only if it beats the production benchmark, and a data scientist signs off, is it published. Otherwise we keep the current model. Let's see it live.</li>
+    </ul>
+    </div>
+    <div class="more">
+      <p><strong>Source.</strong> This slide maps Ģirts' demo application ("How the AI pipeline makes a decision"); the step numbers 01–16 are the same as in the demo, so the audience can follow along.</p>
+      <p><strong>Real-time decision (01–08).</strong> Intake: the transaction arrives from the payment system and the API validates it (all required fields present). Preprocessing: feature engineering (for example distance to the merchant and hour of the day), one-hot encoding of categories, scaling of numeric values. Model: LightGBM returns a raw score, which is turned into a fraud probability. Decision: approve below 0.5, flag as fraud (blocked for review) at 0.5 and above. In the notebook a cutoff of 0.4 caught 5 more frauds for 4 more false alarms; that is a candidate change for a future release.</p>
+      <p><strong>Feedback loop (09–11), human in the loop.</strong> Lecture 6: people's daily work teaches the next model. Flagged payments get a manual analyst review; approved payments can be disputed by the customer, which reveals missed fraud. Both answers are stored as labelled feedback data, with the payment's features.</p>
+      <p><strong>Nightly retraining (12–16).</strong> An AI agent (OpenClaw) retrains a candidate model on the new labels at 02:00 and compares it with the production benchmark, LightGBM v1.0 (Recall 83.99%, precision 92.57%, F1 0.8807, AUC 0.9978). If the candidate is better, a data scientist gets a review task and signs off before the model is published and deployed to step 06. If not, the current model stays. This links to the agent lectures (L10–11) and to Lecture 3's champion loop: a challenger replaces the champion only when it wins.</p>
+      <p><strong>Good question to expect: "how much better is better?"</strong> With 356 fraud cases in the test set, Recall is uncertain by about ±4 points, so the gate should require a clear margin, not any improvement, and big changes can still go through shadow mode before full release (Lecture 8).</p>
     </div>
   </aside>
 </section>
@@ -658,23 +813,22 @@ const slides = Array.from(document.querySelectorAll('.slide'));
 // Pitch storyline
 const PHASES = ['Problem', 'Why AI', 'Data', 'Build', 'Demo', 'Launch & next'];
 
-// Inject the storyline tracker and footer into each slide
+// Inject the app-style top bar and footer into each slide
 slides.forEach((s, i) => {
-  const phase = parseInt(s.dataset.phase, 10);
-  if (phase) {
-    const tr = document.createElement('div');
-    tr.className = 'tracker';
-    tr.innerHTML = PHASES.map((label, j) => {
+  const phase = parseInt(s.dataset.phase, 10) || 0;
+  const tr = document.createElement('div');
+  tr.className = 'tracker';
+  tr.innerHTML = '<span class="brand"><i></i>Catching Fraud · NordPay</span>' +
+    PHASES.map((label, j) => {
       const n = j + 1;
       const cls = n < phase ? ' done' : n === phase ? ' current' : '';
-      return (j ? '<span class="bar"></span>' : '') +
-        `<span class="step${cls}"><span class="dot"></span>${label}</span>`;
-    }).join('');
-    s.prepend(tr);
-  }
+      return `<span class="step${cls}">${label}</span>`;
+    }).join('') +
+    '<span class="status"><i></i>RSU · AI Project Management</span>';
+  s.prepend(tr);
   const ft = document.createElement('div');
   ft.className = 'slide-footer';
-  ft.innerHTML = `<span>Catching Fraud · AI Project Management</span><span>${i + 1} / ${slides.length}</span>`;
+  ft.innerHTML = `<span>Catching Fraud at NordPay · AI Project Management</span><span>${i + 1} / ${slides.length}</span>`;
   s.appendChild(ft);
 });
 
@@ -718,8 +872,8 @@ show(parseInt(location.hash.slice(1), 10) - 1 || 0);
 
 // ── Charts ──────────────────────────────────────────────────────────────
 if (window.Chart) {
-  Chart.defaults.color = '#75696d';
-  Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
+  Chart.defaults.color = '#6b6b66';
+  Chart.defaults.font.family = "'Inter', 'Segoe UI', system-ui, sans-serif";
   Chart.defaults.font.size = 12;
   Chart.defaults.borderColor = 'rgba(42, 32, 36, 0.08)';
   Chart.defaults.devicePixelRatio = 2;
@@ -727,23 +881,23 @@ if (window.Chart) {
   Chart.defaults.plugins.legend.labels.boxWidth = 12;
 
   // Validated chart palette (dataviz validator, light mode, surface #fffdf9):
-  // dark red = fraud / frauds caught, amber = false alarms, sand = everything else
-  const FRAUD = '#9b2335', GOOD = '#9b2335', BURG = '#8a1538', AMBER = '#e0a43a', GREY = '#d9d0c3';
-  const SURFACE = '#fffdf9';
-  Chart.defaults.elements.bar.borderRadius = 4;
+  // dark green = fraud / frauds caught, purple = false alarms, grey = everything else (validated)
+  const FRAUD = '#0a7d5a', GOOD = '#0a7d5a', BURG = '#111111', AMBER = '#7b5cd6', GREY = '#cfcfca';
+  const SURFACE = '#ffffff';
+  Chart.defaults.elements.bar.borderRadius = 0;
   Chart.defaults.elements.bar.borderSkipped = 'start';
   Chart.defaults.elements.bar.borderColor = SURFACE;
   Chart.defaults.elements.bar.borderWidth = 2;
-  Chart.defaults.scale.grid.color = '#ece5da';
+  Chart.defaults.scale.grid.color = '#e6e6e2';
 
-  // Direct value labels on grouped bars (amber sits below 3:1, so values are always visible)
+  // Direct value labels on grouped bars
   const valueLabels = {
     id: 'valueLabels',
     afterDatasetsDraw(chart) {
       const { ctx } = chart;
       ctx.save();
-      ctx.font = "600 12px 'Segoe UI', system-ui, sans-serif";
-      ctx.fillStyle = '#4a3f43';
+      ctx.font = "600 12px 'Inter', 'Segoe UI', system-ui, sans-serif";
+      ctx.fillStyle = '#111111';
       ctx.textAlign = 'center';
       chart.data.datasets.forEach((ds, i) => {
         chart.getDatasetMeta(i).data.forEach((bar, j) => ctx.fillText(ds.data[j], bar.x, bar.y - 6));
