@@ -228,7 +228,7 @@
       .controls, .notes-panel { display: none !important; }
     }
     /* ════════════════════════════════════════════════════════════════════
-       Fraud Monitor style: matches Ģirts' demo app
+       Fraud Monitor style: matches Ģirts' app
        black = ink & structure · yellow = highlight · red = fraud
        teal = approved · chart: red = frauds caught, yellow = false alarms
        ════════════════════════════════════════════════════════════════════ */
@@ -718,7 +718,7 @@
   <aside class="notes">
     <div class="say">
     <ul>
-      <li>(~50 s) Our model is fed by five sources. The payment system streams every payment live; customer, merchant and card-network data refresh daily. In the demo you will see the payment stream and the feedback labels; the other sources are the production plan.</li>
+      <li>(~50 s) Our model is fed by five sources. The payment system streams every payment live; customer, merchant and card-network data refresh daily. Our prototype shows the payment stream and the feedback labels; the other sources are the production plan.</li>
       <li>The fraud answers are the labels the model learns from. They arrive with delays: analyst reviews the same day, customer complaints within days, chargebacks after up to 60 days.</li>
       <li>Every night the data is checked and saved as a dated version, so we always know which data trained which model.</li>
       <li>We built the model on a prototype dataset of 339,607 past payments. Only 1,782 are fraud, so we generated synthetic fraud for training. The test set stays 100% real.</li>
@@ -856,7 +856,7 @@
       <div class="pl-box pl-thick" data-k="06" style="left:974px;top:56px;width:162px;height:118px"><div class="pl-num">06 · v1.0</div><h3>LightGBM 300 trees</h3><div class="pl-val">score +6.50</div></div>
       <svg class="pl-lines" width="1136" height="430" viewBox="0 0 1136 430"><defs><marker id="plA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/></marker></defs><polyline points="162,115 195,115" fill="none" stroke="#111" stroke-width="1.6" marker-end="url(#plA)"/><polyline points="357,115 390,115" fill="none" stroke="#111" stroke-width="1.6" marker-end="url(#plA)"/><polyline points="552,115 585,115" fill="none" stroke="#111" stroke-width="1.6" marker-end="url(#plA)"/><polyline points="747,115 780,115" fill="none" stroke="#111" stroke-width="1.6" marker-end="url(#plA)"/><polyline points="942,115 974,115" fill="none" stroke="#111" stroke-width="1.6" marker-end="url(#plA)"/><polyline points="1055,174 1055,218" fill="none" stroke="#111" stroke-width="1.6" marker-end="url(#plA)"/></svg>
       <div class="pl-lbl  pl-r" style="left:1136px;top:226px">score &rarr; sigmoid &rarr; decision · next slide</div>
-      <div class="pl-ticket" style="left:0;top:250px;width:700px"><div class="sec">Test payment · recorded from the demo API</div><table class="pl-kv"><tr><td>merchant</td><td>Best Buy · online shopping</td></tr><tr><td>amount</td><td>$2,334.03</td></tr><tr><td>time</td><td>Sat 2026-10-17 · 23:29</td></tr><tr><td>cardholder</td><td>78 years · Seattle, WA</td></tr></table></div>
+      <div class="pl-ticket" style="left:0;top:250px;width:700px"><div class="sec">Test payment · recorded from our API</div><table class="pl-kv"><tr><td>merchant</td><td>Best Buy · online shopping</td></tr><tr><td>amount</td><td>$2,334.03</td></tr><tr><td>time</td><td>Sat 2026-10-17 · 23:29</td></tr><tr><td>cardholder</td><td>78 years · Seattle, WA</td></tr></table></div>
     </div>
     <div class="pl-hint">Click a step to see its data in &rarr; process &rarr; data out</div>
   </div>
@@ -910,7 +910,7 @@ one column per state    (13)
         </div>
       </div>
       <div class="pl-panel" data-panel="05" hidden>
-        <div class="pl-ph"><span class="pl-badge">05</span><b>Scaling</b><span class="pl-desc">The model was trained on standardised inputs; the live API folds this step into the model.</span><button type="button" class="pl-close" tabindex="-1">&times; close</button></div>
+        <div class="pl-ph"><span class="pl-badge">05</span><b>Scaling</b><span class="pl-desc">The model was trained on standardised inputs; the API folds this step into the model.</span><button type="button" class="pl-close" tabindex="-1">&times; close</button></div>
         <div class="pl-cols">
           <div class="pl-col"><div class="pl-ct">Data in</div><table class="pl-kv"><tr><td>amount</td><td>$2,334.03</td></tr><tr><td>hour</td><td>23</td></tr><tr><td>age</td><td>78</td></tr><tr><td>distance</td><td>1,757 km</td></tr></table><p class="pl-drop">+ 35 more inputs</p></div>
           <div class="pl-carr">&rarr;</div>
@@ -921,7 +921,7 @@ with a threshold, so
   x > t  is the same as
   z > (t - mean) / std</pre></div>
           <div class="pl-carr">&rarr;</div>
-          <div class="pl-col"><div class="pl-ct">Data out</div><div class="pl-sub">In the live API</div><div class="pl-big">folded into the model</div><table class="pl-kv"><tr><td>predictions</td><td>identical</td></tr><tr><td>model reads</td><td>raw values</td></tr><tr><td>sent to</td><td>step 06</td></tr></table></div>
+          <div class="pl-col"><div class="pl-ct">Data out</div><div class="pl-sub">In the API</div><div class="pl-big">folded into the model</div><table class="pl-kv"><tr><td>predictions</td><td>identical</td></tr><tr><td>model reads</td><td>raw values</td></tr><tr><td>sent to</td><td>step 06</td></tr></table></div>
         </div>
       </div>
       <div class="pl-panel" data-panel="06" hidden>
@@ -944,7 +944,7 @@ with a threshold, so
     </ul>
     </div>
     <div class="more">
-      <p><strong>What is shown.</strong> One recorded response of the demo API (POST /explain) for a single synthetic test payment; the slides do not call the API. Source: Ģirts' pipeline_example.json. The step numbers 01–16 are the same as in his demo.</p>
+      <p><strong>What is shown.</strong> One recorded response of our fraud API (POST /explain) for a single synthetic test payment; the slides do not call the API. Source: Ģirts' pipeline_example.json.</p>
       <p><strong>How the score is built.</strong> Each of the 300 trees adds a small correction to a starting value (−9.23 in log-odds); the total for this payment is +6.50.</p>
       <p><strong>Scaling (05).</strong> The model was trained on standardised inputs, but trees only compare a value with a threshold, so the scaler was folded into the thresholds: identical predictions, and the API feeds raw values.</p>
       <p><strong>Lecture 6 mapping.</strong> These slides are the "serve" step (train → export → catalogue → build → deploy → serve → watch); "watch" and retraining follow on the next two slides.</p>
@@ -958,7 +958,7 @@ with a threshold, so
   <div class="body pl-body2">
     <div class="pl-canvas" style="height:430px">
       <div class="pl-intro" style="left:0;top:30px;width:300px"><div class="sec">Model &rarr; decision</div><p>The score becomes a probability. At 0.5 or more the payment is flagged.</p></div>
-      <div class="pl-intro" style="left:0;top:200px;width:340px"><div class="sec">Feedback loop · human in the loop</div><p>Flagged payments are reviewed by an analyst; approved ones can be disputed by the customer. Every human label becomes new training data.</p><span class="chip sim">Simulated in demo</span></div>
+      <div class="pl-intro" style="left:0;top:200px;width:340px"><div class="sec">Feedback loop · human in the loop</div><p>Flagged payments are reviewed by an analyst; approved ones can be disputed by the customer. Every human label becomes new training data.</p><span class="chip sim">Simulation</span></div>
       <div class="pl-box pl-thick" data-k="06" style="left:330px;top:30px;width:180px;height:100px"><div class="pl-num">06 · v1.0</div><h3>LightGBM 300 trees</h3><div class="pl-val">score +6.50</div></div>
       <div class="pl-box" data-k="07" style="left:570px;top:30px;width:180px;height:100px"><div class="pl-num">07</div><h3>Sigmoid &rarr; probability</h3><div class="pl-val">p 99.85 %</div></div>
       <div class="pl-dia" data-k="08" style="left:820px;top:14px"><span class="pl-num">08</span><div><b>Decision</b>p &ge; 0.5 ?</div></div>
@@ -1079,7 +1079,7 @@ append to feedback table</pre></div>
     <ul>
       <li>(~40 s) The score goes through a sigmoid and becomes a probability: 99.85% fraud. The rule is simple: at 0.5 or more the payment is flagged and blocked; below 0.5 it is approved.</li>
       <li>Then people close the loop. An analyst reviews every flagged payment; our Best Buy payment is confirmed as fraud. Approved payments can still be disputed by the customer, which reveals a fraud the model missed.</li>
-      <li>Every human answer becomes a labelled training example. In the demo this loop is simulated.</li>
+      <li>Every human answer becomes a labelled training example. In our prototype this loop is simulated.</li>
     </ul>
     </div>
     <div class="more">
@@ -1195,96 +1195,23 @@ try again tomorrow 02:00</pre></div>
     <ul>
       <li>(~40 s) Every night at 02:00 the OpenClaw AI agent retrains a candidate model on the new labels.</li>
       <li>The candidate is compared with the production benchmark, LightGBM v1.0. Only if it is better, and a data scientist signs off, is it published back to step 06. Otherwise we keep the current model.</li>
-      <li>"Let's see it in action."</li>
+      <li>Next: the whole pipeline in one view.</li>
     </ul>
     </div>
     <div class="more">
       <p><strong>Why a gate.</strong> An automatic retrain can make the model worse (bad labels, a strange week). The benchmark check (13) and a human sign-off (14) stop a worse model from going live; the previous version is kept for rollback.</p>
-      <p><strong>Benchmark.</strong> The production model LightGBM v1.0: recall 83.99%, precision 92.57%, F1 0.8807, AUC 0.9978, as shown in Ģirts' demo.</p>
+      <p><strong>Benchmark.</strong> The production model LightGBM v1.0: recall 83.99%, precision 92.57%, F1 0.8807, AUC 0.9978.</p>
       <p><strong>Lecture 6 mapping.</strong> This is the "watch" and retrain part of the MLOps loop: monitor, collect labels, retrain, validate, deploy.</p>
     </div>
   </aside>
 </section>
 
 <!-- ════════════════════════════════════════════════════════════════════════ -->
-<!--  8 · DEMO                                                              -->
+<!--  PIPELINE · FULL VIEW (steps 01–16)                                      -->
 <!-- ════════════════════════════════════════════════════════════════════════ -->
-<section class="slide" data-phase="5" data-title="Live demo">
-  <div class="body center" style="align-items: center; text-align: center;">
-    <div class="kicker">Demo · Live</div>
-    <h1>See <span class="hl">demo</span></h1>
-    <div class="row" style="justify-content: center; gap: 12px; margin-top: 30px;"><span class="btn primary">&#9654; Send transaction</span><span class="btn">Send suspicious</span><span class="btn">Stream mode</span></div>
-  </div>
-  <aside class="notes">
-    <div class="say">
-    <ul>
-      <li>Placeholder: Ģirts presents the live demo from Docker.</li>
-    </ul>
-    </div>
-  </aside>
-</section>
-
-<!-- ════════════════════════════════════════════════════════════════════════ -->
-<!--  9 · LAUNCH, MEASURE, RISKS, IMPROVE                                   -->
-<!-- ════════════════════════════════════════════════════════════════════════ -->
-<section class="slide" data-phase="6" data-title="Launch and next steps">
-  <div class="kicker">Launch &amp; next · Running it in the company</div>
-  <h2>How we launch it,<br><span class="hl">and keep it right</span></h2>
-  <p class="lead">Prove it on live payments first, measure it in money, and keep it learning.</p>
-
-  <div class="body">
-    <div class="grid-4">
-      <div class="card">
-        <span class="tag t-burg">First launch</span>
-        <h3>Small steps</h3>
-        <p class="small"><strong>Shadow mode:</strong> score live payments, block nothing. Then 5% &rarr; 25% &rarr; 100%, with an off switch.</p>
-      </div>
-      <div class="card">
-        <span class="tag t-burg">Measure</span>
-        <h3>In money</h3>
-        <p class="small"><strong>$32,120</strong> less fraud loss than the baseline on the prototype test set. Live: confirmed by analyst reviews, complaints and chargebacks.</p>
-      </div>
-      <div class="card">
-        <span class="tag t-burg">Risks</span>
-        <h3>Watch closely</h3>
-        <p class="small">Fraudsters adapt (drift). Wrong blocks hurt customers. Personal data under GDPR.</p>
-      </div>
-      <div class="card">
-        <span class="tag t-burg">Improve</span>
-        <h3>Every night</h3>
-        <p class="small">An AI agent retrains on new labels; a new model ships only if it beats the benchmark and a data scientist signs off.</p>
-      </div>
-    </div>
-    <div class="callout">
-      The hard part was not the algorithm. It was the decisions before and after it.
-      <span class="small">Thank you · Questions?</span>
-    </div>
-  </div>
-  <aside class="notes">
-    <div class="say">
-    <ul>
-      <li>(~50 s) First launch: shadow mode, where the model scores real payments but blocks nothing; then a canary release, 5%, 25%, 100%, always with a way back. After that, updates come through the nightly loop you saw in the pipeline.</li>
-      <li>Measure: on the prototype test set the champion prevents about $32,120 more fraud loss than the baseline. Live, success is confirmed by analyst reviews, customer complaints and chargebacks.</li>
-      <li>Risks: fraudsters adapt, wrong blocks hurt real customers, and we handle personal data under GDPR.</li>
-      <li>Improve: every night an AI agent retrains on the new labels, and a new model only ships if it beats the benchmark and a data scientist signs off. Close with the one-liner, then questions.</li>
-    </ul>
-    </div>
-    <div class="more">
-      <p><strong>Launch in small steps (Lecture 8).</strong> A test score is only a promise: in the SickKids silent trial a model scored 0.90 on old data but 0.50 on new patients. Shadow mode checks the promise on the company's live payments without affecting customers. Analyst reviews and customer complaints give a first read within days; chargebacks complete the picture after about 60 days (Stripe faces the same delay). The canary release compares the model with today's rules in the same weeks, not before vs after.</p>
-      <p><strong>Measure in money.</strong> On the prototype test set the champion catches 62 more frauds than the baseline; at the average fraud value of $518 that is about $32,120 less loss on 67,922 payments. Live KPIs: fraud caught, false alarms and complaints, losses prevented per month, analyst workload, results per customer group, and how often analysts overturn the model's flags (step 09 in the pipeline gives us this for every flagged payment).</p>
-      <p><strong>Main risks.</strong> Drift: fraud patterns change, so the model ages (Lecture 8: Instacart in 2020). Wrong blocks hurt real customers. Unequal errors: age is one of the strongest signals, so error rates are checked per age group. Privacy: birth dates and home locations fall under GDPR (access by role, deletion on request, a documented model). One bad input, such as a wrong address, can corrupt several signals, so inputs are checked and rules are the fallback.</p>
-      <p><strong>Improve every night (Lecture 2, the data engine).</strong> Every analyst review and customer complaint becomes a label. At 02:00 an AI agent retrains a candidate and compares it with the production benchmark; a data scientist signs off before release, and larger changes can still go through shadow mode first. First targets: study the 57 frauds the prototype missed, and add the behaviour signals from live data.</p>
-      <p><strong>Closing line.</strong> "The hard part was not the algorithm. It was the decisions before and after it." Then open for questions; the backup deck has every detail.</p>
-    </div>
-  </aside>
-</section>
-
-<!-- ════════════════════════════════════════════════════════════════════════ -->
-<!--  BACKUP · PIPELINE MAP (mirrors Ģirts' demo, steps 01–16)              -->
-<!-- ════════════════════════════════════════════════════════════════════════ -->
-<section class="slide" data-title="Backup: pipeline map">
-  <div class="kicker">Backup · If the live pipeline is unavailable</div>
-  <h2>How the AI pipeline<br><span class="hl">makes a decision</span> and learns</h2>
+<section class="slide" data-phase="4" data-title="Pipeline: full view">
+  <div class="kicker">Build · Pipeline · full view</div>
+  <h2>The AI pipeline<br><span class="hl">full view</span></h2>
   <p class="lead">One payment through every step, then how human feedback retrains the model every night.</p>
 
   <div class="body" style="gap: 12px; padding-top: 18px;">
@@ -1343,18 +1270,73 @@ try again tomorrow 02:00</pre></div>
   <aside class="notes">
     <div class="say">
     <ul>
-      <li>(~60 s) This is our AI pipeline, the same one you'll see live in a moment. It has three loops.</li>
+      <li>(~30 s) Here is the whole pipeline in one view, steps 01 to 16. It has three loops.</li>
       <li>Every payment: the transaction comes in, is validated, turned into model inputs, scored by LightGBM, and the decision is made. Below a probability of 0.5 it is approved, above it is flagged as fraud.</li>
       <li>During the day, people close the loop: an analyst reviews every flagged payment, and a customer complaint about an approved payment reveals a fraud we missed. Every human answer becomes a new training example.</li>
-      <li>Every night at 02:00 an AI agent retrains a candidate model on the new labels. Only if it beats the production benchmark, and a data scientist signs off, is it published. Otherwise we keep the current model. Let's see it live.</li>
+      <li>Every night at 02:00 an AI agent retrains a candidate model on the new labels. Only if it beats the production benchmark, and a data scientist signs off, is it published. Otherwise we keep the current model. Next: how we launch it and measure success.</li>
     </ul>
     </div>
     <div class="more">
-      <p><strong>Source.</strong> This slide maps Ģirts' demo application ("How the AI pipeline makes a decision"); the step numbers 01–16 are the same as in the demo, so the audience can follow along.</p>
-      <p><strong>Real-time decision (01–08).</strong> Intake: the transaction arrives from the payment system and the API validates it (all required fields present). Preprocessing: feature engineering (for example distance to the merchant and hour of the day) and one-hot encoding of categories; scaling (05) is folded into the model thresholds in the live API. Model (06): LightGBM returns a raw score, which the sigmoid (07) turns into a fraud probability. Decision: approve below 0.5, flag as fraud (blocked for review) at 0.5 and above. In the notebook a cutoff of 0.4 caught 5 more frauds for 4 more false alarms; that is a candidate change for a future release.</p>
+      <p><strong>Source.</strong> This slide sums up the three pipeline slides before it on one page; the step numbers 01–16 are the same, so the audience can follow along.</p>
+      <p><strong>Real-time decision (01–08).</strong> Intake: the transaction arrives from the payment system and the API validates it (all required fields present). Preprocessing: feature engineering (for example distance to the merchant and hour of the day) and one-hot encoding of categories; scaling (05) is folded into the model thresholds in the API. Model (06): LightGBM returns a raw score, which the sigmoid (07) turns into a fraud probability. Decision: approve below 0.5, flag as fraud (blocked for review) at 0.5 and above. In the notebook a cutoff of 0.4 caught 5 more frauds for 4 more false alarms; that is a candidate change for a future release.</p>
       <p><strong>Feedback loop (09–11), human in the loop.</strong> Lecture 6: people's daily work teaches the next model. Flagged payments get a manual analyst review; approved payments can be disputed by the customer, which reveals missed fraud. Both answers are stored as labelled feedback data, with the payment's features.</p>
       <p><strong>Nightly retraining (12–16).</strong> An AI agent (OpenClaw) retrains a candidate model on the new labels at 02:00 and compares it with the production benchmark, LightGBM v1.0 (Recall 83.99%, precision 92.57%, F1 0.8807, AUC 0.9978). If the candidate is better, a data scientist gets a review task and signs off before the model is published and deployed to step 06. If not, the current model stays. This links to the agent lectures (L10–11) and to Lecture 3's champion loop: a challenger replaces the champion only when it wins.</p>
       <p><strong>Good question to expect: "how much better is better?"</strong> With 356 fraud cases in the test set, Recall is uncertain by about ±4 points, so the gate should require a clear margin, not any improvement, and big changes can still go through shadow mode before full release (Lecture 8).</p>
+    </div>
+  </aside>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!--  9 · LAUNCH, MEASURE, RISKS, IMPROVE                                   -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<section class="slide" data-phase="5" data-title="Launch and next steps">
+  <div class="kicker">Launch &amp; next · Running it in the company</div>
+  <h2>How we launch it,<br><span class="hl">and keep it right</span></h2>
+  <p class="lead">Prove it on live payments first, measure it in money, and keep it learning.</p>
+
+  <div class="body">
+    <div class="grid-4">
+      <div class="card">
+        <span class="tag t-burg">First launch</span>
+        <h3>Small steps</h3>
+        <p class="small"><strong>Shadow mode:</strong> score live payments, block nothing. Then 5% &rarr; 25% &rarr; 100%, with an off switch.</p>
+      </div>
+      <div class="card">
+        <span class="tag t-burg">Measure</span>
+        <h3>In money</h3>
+        <p class="small"><strong>$32,120</strong> less fraud loss than the baseline on the prototype test set. Live: confirmed by analyst reviews, complaints and chargebacks.</p>
+      </div>
+      <div class="card">
+        <span class="tag t-burg">Risks</span>
+        <h3>Watch closely</h3>
+        <p class="small">Fraudsters adapt (drift). Wrong blocks hurt customers. Personal data under GDPR.</p>
+      </div>
+      <div class="card">
+        <span class="tag t-burg">Improve</span>
+        <h3>Every night</h3>
+        <p class="small">An AI agent retrains on new labels; a new model ships only if it beats the benchmark and a data scientist signs off.</p>
+      </div>
+    </div>
+    <div class="callout">
+      The hard part was not the algorithm. It was the decisions before and after it.
+      <span class="small">Thank you · Questions?</span>
+    </div>
+  </div>
+  <aside class="notes">
+    <div class="say">
+    <ul>
+      <li>(~50 s) First launch: shadow mode, where the model scores real payments but blocks nothing; then a canary release, 5%, 25%, 100%, always with a way back. After that, updates come through the nightly loop you saw in the pipeline.</li>
+      <li>Measure: on the prototype test set the champion prevents about $32,120 more fraud loss than the baseline. Live, success is confirmed by analyst reviews, customer complaints and chargebacks.</li>
+      <li>Risks: fraudsters adapt, wrong blocks hurt real customers, and we handle personal data under GDPR.</li>
+      <li>Improve: every night an AI agent retrains on the new labels, and a new model only ships if it beats the benchmark and a data scientist signs off. Close with the one-liner, then questions.</li>
+    </ul>
+    </div>
+    <div class="more">
+      <p><strong>Launch in small steps (Lecture 8).</strong> A test score is only a promise: in the SickKids silent trial a model scored 0.90 on old data but 0.50 on new patients. Shadow mode checks the promise on the company's live payments without affecting customers. Analyst reviews and customer complaints give a first read within days; chargebacks complete the picture after about 60 days (Stripe faces the same delay). The canary release compares the model with today's rules in the same weeks, not before vs after.</p>
+      <p><strong>Measure in money.</strong> On the prototype test set the champion catches 62 more frauds than the baseline; at the average fraud value of $518 that is about $32,120 less loss on 67,922 payments. Live KPIs: fraud caught, false alarms and complaints, losses prevented per month, analyst workload, results per customer group, and how often analysts overturn the model's flags (step 09 in the pipeline gives us this for every flagged payment).</p>
+      <p><strong>Main risks.</strong> Drift: fraud patterns change, so the model ages (Lecture 8: Instacart in 2020). Wrong blocks hurt real customers. Unequal errors: age is one of the strongest signals, so error rates are checked per age group. Privacy: birth dates and home locations fall under GDPR (access by role, deletion on request, a documented model). One bad input, such as a wrong address, can corrupt several signals, so inputs are checked and rules are the fallback.</p>
+      <p><strong>Improve every night (Lecture 2, the data engine).</strong> Every analyst review and customer complaint becomes a label. At 02:00 an AI agent retrains a candidate and compares it with the production benchmark; a data scientist signs off before release, and larger changes can still go through shadow mode first. First targets: study the 57 frauds the prototype missed, and add the behaviour signals from live data.</p>
+      <p><strong>Closing line.</strong> "The hard part was not the algorithm. It was the decisions before and after it." Then open for questions; the backup deck has every detail.</p>
     </div>
   </aside>
 </section>
@@ -1377,7 +1359,7 @@ try again tomorrow 02:00</pre></div>
 // ── Slide engine ────────────────────────────────────────────────────────
 const slides = Array.from(document.querySelectorAll('.slide'));
 // Pitch storyline
-const PHASES = ['Problem', 'Why AI', 'Data', 'Build', 'Demo', 'Launch & next'];
+const PHASES = ['Problem', 'Why AI', 'Data', 'Build', 'Launch & next'];
 
 // Inject the app-style top bar and footer into each slide
 slides.forEach((s, i) => {
